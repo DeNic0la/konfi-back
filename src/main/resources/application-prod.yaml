@@ -1,0 +1,7 @@
+spring:
+  jpa:
+    hibernate.ddl-auto: "validate"
+  datasource:
+    url: "jdbc:mysql://localhost/test"
+    username: "dbuser"
+    password: "dbpass"
