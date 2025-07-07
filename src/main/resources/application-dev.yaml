@@ -6,3 +6,11 @@ spring:
     url: "jdbc:mysql://localhost/test"
     username: "dbuser"
     password: "dbpass"
+  security:
+    enabled: false
+security:
+  basic:
+    enabled: false
+managment:
+  security:
+    enabled: false
