@@ -3,13 +3,11 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [ "develop" ]
-  push:
-    branches: # Specify your branches here
-      - develop # The 'develop' branch
+    types: [ "opened", "synchronize", "reopened" ]
 
 jobs:
   build:
-    name: Build
+    name: Spotless Apply
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,3 +21,11 @@ jobs:
           java-version: 24
       - run: mvn install -DskipTests=true
       - run: mvn spotless:apply
+      - uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+
+          commit_message: "chore(ci): spotless:apply"
+
+          # Optional. Option used by `git-status`to determine if the repository is
+          # dirty. See https://git-scm.com/docs/git-status#_options
+          status_options: '--untracked-files=no'
