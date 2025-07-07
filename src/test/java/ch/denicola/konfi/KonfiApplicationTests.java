@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Profile;
 @Import(TestcontainersConfiguration.class)
 class KonfiApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
-
+  @Test
+  void contextLoads() {}
 }

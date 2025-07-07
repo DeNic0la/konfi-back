@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class TableMessage {
-    private MessageType type;
-    private Integer konfi;
-    private String user;
+  private MessageType type;
+  private Integer konfi;
+  private String user;
 }
