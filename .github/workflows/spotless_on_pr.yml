@@ -1,4 +1,4 @@
-name: spotless_on_pr.yml
+name: Spotless on PR
 on:
   workflow_dispatch:
   pull_request:
