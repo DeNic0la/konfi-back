@@ -29,6 +29,8 @@
     <properties>
         <java.version>24</java.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <spotless.version>2.44.5</spotless.version>
+        <google-java-format.version>1.27.0</google-java-format.version>
     </properties>
     <profiles>
         <profile>
@@ -238,6 +240,84 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <!-- optional: limit format enforcement to just the files changed by this feature branch -->
+                    <ratchetFrom>origin/develop</ratchetFrom>
+                    <formats>
+                        <!-- you can define as many formats as you want, each is independent -->
+                        <format>
+                            <!-- define the files to apply to -->
+                            <includes>
+                                <include>.gitattributes</include>
+                                <include>.gitignore</include>
+                            </includes>
+                            <!-- define the steps to apply to those files -->
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <indent>
+                                <tabs>true</tabs>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+                    <!-- define a language-specific format -->
+
+                    <markdown>
+                        <includes> <!-- You have to set the target manually -->
+                            <include>**/*.md</include>
+                        </includes>
+
+                        <flexmark/> <!-- has its own section below -->
+                    </markdown>
+
+
+                    <java>
+                        <!-- These are the defaults, you can override if you want -->
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+
+                        <!-- Cleanthat will refactor your code, but it may break your style: apply it before your formatter -->
+                        <cleanthat />        <!-- has its own section below -->
+
+                        <googleJavaFormat>
+                            <version>${google-java-format.version}</version>                      <!-- optional, 1.8 is the minimum supported version for Java 11 -->
+                            <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
+                            <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
+                            <formatJavadoc>false</formatJavadoc>        <!-- optional -->
+                        </googleJavaFormat>
+
+                        <importOrder>  <!-- or a custom ordering -->
+                            <wildcardsLast>false</wildcardsLast> <!-- Optional, default false. Sort wildcard import after specific imports -->
+                            <order>java|javax,org,com,com.diffplug,,\#com.diffplug,\#</order>  <!-- or use <file>${project.basedir}/eclipse.importorder</file> -->
+                            <!-- you can use an empty string for all the imports you didn't specify explicitly, '|' to join group without blank line, and '\#` prefix for static imports. -->
+                            <semanticSort>false</semanticSort> <!-- Optional, default false. Sort by package, then class, then member (for static imports). Splitting is based on common conventions (packages are lower case, classes start with upper case). Use <treatAsPackage> and <treatAsClass> for exceptions. -->
+                            <treatAsPackage> <!-- Packages starting with upper case letters. -->
+                                <package>ch.denic0la.MyPackage</package>
+                            </treatAsPackage>
+                            <treatAsClass> <!-- Classes starting with lower case letters. -->
+                                <class>ch.denic0la.myClass</class>
+                            </treatAsClass>
+                        </importOrder>
+
+                        <removeUnusedImports /> <!-- self-explanatory -->
+                        <formatAnnotations />  <!-- fixes formatting of type annotations, see below -->
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
