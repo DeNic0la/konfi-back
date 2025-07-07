@@ -2,7 +2,7 @@ name: spotless_on_pr.yml
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "develop" ]:
+    branches: [ "develop" ]
   push:
     branches: # Specify your branches here
       - develop # The 'develop' branch
