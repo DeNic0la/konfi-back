@@ -21,5 +21,5 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 24
-      - run: mvn install
+      - run: mvn install -DskipTests=true
       - run: mvn spotless:apply
