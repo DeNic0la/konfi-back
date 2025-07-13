@@ -31,6 +31,12 @@
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <spotless.version>2.44.5</spotless.version>
         <google-java-format.version>1.27.0</google-java-format.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <springdoc.version>1.6.14</springdoc.version>
+        <swagger-ui.version>5.3.1</swagger-ui.version>
+        <openapi-generator.base-package>ch.denic0la.openapi.konfi.brunch</openapi-generator.base-package>
     </properties>
     <profiles>
         <profile>
@@ -192,6 +198,44 @@
             <artifactId>r2dbc</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+        <!-- OpenAPI and Swagger dependencies -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <!--SpringDoc dependencies -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+        <!-- @Nullable annotation -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+        <!-- Bean Validation API support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -316,6 +360,61 @@
                             <goal>apply</goal>
                         </goals>
                         <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.14.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                https://github.com/DeNic0la/konfi-infra/raw/refs/tags/brunch-api/1.1.2/spec/Brunch.yaml
+                            </inputSpec>
+                            <skipValidateSpec>false</skipValidateSpec>
+                            <library>spring-boot</library>
+                            <verbose>false</verbose>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>${openapi-generator.base-package}.api</apiPackage>
+                            <modelPackage>${openapi-generator.base-package}.model</modelPackage>
+                            <packageName>${openapi-generator.base-package}</packageName>
+                            <artifactId>brunch-generated</artifactId>
+                            <groupId>${project.groupId}</groupId>
+                            <configHelp>false</configHelp>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <artifactVersion>${project.version}</artifactVersion>
+                            <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <generatorLanguage>Java</generatorLanguage>
+                                <generatorType>SERVER</generatorType>
+                                <useSpringController>true</useSpringController>
+                                <singleContentTypes>true</singleContentTypes>
+                                <returnSuccessCode>true</returnSuccessCode>
+
+                                <basePackage>${openapi-generator.base-package}</basePackage>
+
+                                <resourceFolder>src/main/resources</resourceFolder>
+                                <sourceFolder>src/main/java</sourceFolder>
+
+                                <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                                <generateConstructorWithAllArgs>false</generateConstructorWithAllArgs>
+                                <generateBuilders>true</generateBuilders>
+                                <additionalModelTypeAnnotations>@lombok.Data; @lombok.NoArgsConstructor; @lombok.ToString(callSuper=true, includeFieldNames=true) </additionalModelTypeAnnotations>
+                                <useTags>false</useTags>
+                                <title>Brunch</title>
+                                <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
+                                <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
+                                <useOptional>true</useOptional>
+                                <configPackage>${openapi-generator.base-package}.configuration</configPackage>
+                            </configOptions>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
