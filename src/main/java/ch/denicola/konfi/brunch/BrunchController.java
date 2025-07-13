@@ -33,10 +33,14 @@ public class BrunchController implements BrunchApi {
 
     @Override
     public ResponseEntity<BrunchInfoDTO> createBrunch(BrunchCreateDTO brunchCreateDTO) {
+        // Check if brunch with the same ID already exists
+        if (brunchRepository.existsById(brunchCreateDTO.getId())) {
+            return ResponseEntity.status(409).body(null); // Conflict
+        }
         var brunch = brunchService.brunchCreateDTOToBrunch(brunchCreateDTO);
         log.info(brunch.toString());
         var saved = brunchRepository.save(brunch);
         var data = brunchService.brunchToBrunchInfoDTO(saved);
-        return ResponseEntity.ok(data);
+        return ResponseEntity.status(201).body(data);
     }
 }
