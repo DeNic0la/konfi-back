@@ -157,10 +157,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-r2dbc</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-rest</artifactId>
@@ -220,21 +220,21 @@
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>io.asyncer</groupId>
             <artifactId>r2dbc-mysql</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>io.r2dbc</groupId>
             <artifactId>r2dbc-h2</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -279,11 +279,11 @@
             <artifactId>mysql</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>r2dbc</artifactId>
             <scope>test</scope>
-        </dependency>
+        </dependency-->
 
 
         <!-- OpenAPI and Swagger dependencies -->
@@ -321,11 +321,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>ch.denicola.konfi</groupId>
-            <artifactId>brunch-generated</artifactId>
-            <version>${openapi-generator.brunch.version}</version>
-        </dependency-->
+
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 
 
     </dependencies>
@@ -380,6 +381,7 @@
                             <artifactId>brunch-generated</artifactId>
                             <groupId>${project.groupId}.konfi</groupId>
                             <configHelp>false</configHelp>
+                            <modelNameSuffix>DTO</modelNameSuffix>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <artifactVersion>${openapi-generator.brunch.version}</artifactVersion>
@@ -390,6 +392,8 @@
                                 <useSpringController>true</useSpringController>
                                 <singleContentTypes>true</singleContentTypes>
                                 <returnSuccessCode>true</returnSuccessCode>
+
+                                <serializableModel>true</serializableModel>
 
                                 <basePackage>${openapi-generator.base-package}</basePackage>
 
@@ -405,7 +409,7 @@
                                 <title>Brunch</title>
                                 <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
                                 <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
-                                <useOptional>true</useOptional>
+                                <useOptional>false</useOptional>
                                 <configPackage>${openapi-generator.base-package}.configuration</configPackage>
                             </configOptions>
                             <!--output>${project.basedir}/generated</output-->
