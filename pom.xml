@@ -37,6 +37,7 @@
         <springdoc.version>1.6.14</springdoc.version>
         <swagger-ui.version>5.3.1</swagger-ui.version>
         <openapi-generator.base-package>ch.denic0la.openapi.konfi.brunch</openapi-generator.base-package>
+        <openapi-generator.brunch.version>1.2.0</openapi-generator.brunch.version>
     </properties>
     <profiles>
         <profile>
@@ -56,6 +57,91 @@
             <properties>
                 <activatedProperties>test</activatedProperties>
             </properties>
+        </profile>
+        <profile>
+            <id>spotless</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <version>${spotless.version}</version>
+                        <configuration>
+                            <!-- optional: limit format enforcement to just the files changed by this feature branch -->
+                            <ratchetFrom>origin/develop</ratchetFrom>
+                            <formats>
+                                <!-- you can define as many formats as you want, each is independent -->
+                                <format>
+                                    <!-- define the files to apply to -->
+                                    <includes>
+                                        <include>.gitattributes</include>
+                                        <include>.gitignore</include>
+                                    </includes>
+                                    <!-- define the steps to apply to those files -->
+                                    <trimTrailingWhitespace/>
+                                    <endWithNewline/>
+                                    <indent>
+                                        <tabs>true</tabs>
+                                        <spacesPerTab>4</spacesPerTab>
+                                    </indent>
+                                </format>
+                            </formats>
+                            <!-- define a language-specific format -->
+
+                            <markdown>
+                                <includes> <!-- You have to set the target manually -->
+                                    <include>**/*.md</include>
+                                </includes>
+
+                                <flexmark/> <!-- has its own section below -->
+                            </markdown>
+
+
+                            <java>
+                                <!-- These are the defaults, you can override if you want -->
+                                <includes>
+                                    <include>src/main/java/**/*.java</include>
+                                    <include>src/test/java/**/*.java</include>
+                                </includes>
+
+                                <!-- Cleanthat will refactor your code, but it may break your style: apply it before your formatter -->
+                                <cleanthat />        <!-- has its own section below -->
+
+                                <googleJavaFormat>
+                                    <version>${google-java-format.version}</version>                      <!-- optional, 1.8 is the minimum supported version for Java 11 -->
+                                    <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
+                                    <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
+                                    <formatJavadoc>false</formatJavadoc>        <!-- optional -->
+                                </googleJavaFormat>
+
+                                <importOrder>  <!-- or a custom ordering -->
+                                    <wildcardsLast>false</wildcardsLast> <!-- Optional, default false. Sort wildcard import after specific imports -->
+                                    <order>java|javax,org,com,com.diffplug,,\#com.diffplug,\#</order>  <!-- or use <file>${project.basedir}/eclipse.importorder</file> -->
+                                    <!-- you can use an empty string for all the imports you didn't specify explicitly, '|' to join group without blank line, and '\#` prefix for static imports. -->
+                                    <semanticSort>false</semanticSort> <!-- Optional, default false. Sort by package, then class, then member (for static imports). Splitting is based on common conventions (packages are lower case, classes start with upper case). Use <treatAsPackage> and <treatAsClass> for exceptions. -->
+                                    <treatAsPackage> <!-- Packages starting with upper case letters. -->
+                                        <package>ch.denic0la.MyPackage</package>
+                                    </treatAsPackage>
+                                    <treatAsClass> <!-- Classes starting with lower case letters. -->
+                                        <class>ch.denic0la.myClass</class>
+                                    </treatAsClass>
+                                </importOrder>
+
+                                <removeUnusedImports /> <!-- self-explanatory -->
+                                <formatAnnotations />  <!-- fixes formatting of type annotations, see below -->
+                            </java>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>apply</goal>
+                                </goals>
+                                <phase>compile</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
     <dependencies>
@@ -235,6 +321,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!--dependency>
+            <groupId>ch.denicola.konfi</groupId>
+            <artifactId>brunch-generated</artifactId>
+            <version>${openapi-generator.brunch.version}</version>
+        </dependency-->
+
 
     </dependencies>
     <dependencyManagement>
@@ -257,6 +349,89 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.14.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-code</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                https://github.com/DeNic0la/konfi-infra/raw/refs/tags/brunch-api/${openapi-generator.brunch.version}/spec/Brunch.yaml
+                            </inputSpec>
+                            <skipIfSpecIsUnchanged>false</skipIfSpecIsUnchanged>
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <!--output>${project.basedir}/generated-sources</output-->
+                            <skipValidateSpec>false</skipValidateSpec>
+                            <openapiGeneratorIgnoreList>
+                                **/OpenApiGeneratorApplication.java
+                                **/test/**
+                            </openapiGeneratorIgnoreList>
+                            <library>spring-boot</library>
+                            <verbose>false</verbose>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>${openapi-generator.base-package}.api</apiPackage>
+                            <modelPackage>${openapi-generator.base-package}.model</modelPackage>
+                            <packageName>${openapi-generator.base-package}</packageName>
+                            <artifactId>brunch-generated</artifactId>
+                            <groupId>${project.groupId}.konfi</groupId>
+                            <configHelp>false</configHelp>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <artifactVersion>${openapi-generator.brunch.version}</artifactVersion>
+                            <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <generatorLanguage>Java</generatorLanguage>
+                                <generatorType>SERVER</generatorType>
+                                <useSpringController>true</useSpringController>
+                                <singleContentTypes>true</singleContentTypes>
+                                <returnSuccessCode>true</returnSuccessCode>
+
+                                <basePackage>${openapi-generator.base-package}</basePackage>
+
+                                <resourceFolder>src/main/resources</resourceFolder>
+                                <sourceFolder>src/main/java</sourceFolder>
+
+
+                                <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                                <generateConstructorWithAllArgs>false</generateConstructorWithAllArgs>
+                                <generateBuilders>true</generateBuilders>
+                                <additionalModelTypeAnnotations>@lombok.Data; @lombok.NoArgsConstructor; @lombok.ToString(callSuper=true, includeFieldNames=true) </additionalModelTypeAnnotations>
+                                <useTags>true</useTags>
+                                <title>Brunch</title>
+                                <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
+                                <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
+                                <useOptional>true</useOptional>
+                                <configPackage>${openapi-generator.base-package}.configuration</configPackage>
+                            </configOptions>
+                            <!--output>${project.basedir}/generated</output-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>generated-sources/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -285,139 +460,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless.version}</version>
-                <configuration>
-                    <!-- optional: limit format enforcement to just the files changed by this feature branch -->
-                    <ratchetFrom>origin/develop</ratchetFrom>
-                    <formats>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <format>
-                            <!-- define the files to apply to -->
-                            <includes>
-                                <include>.gitattributes</include>
-                                <include>.gitignore</include>
-                            </includes>
-                            <!-- define the steps to apply to those files -->
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
-                            <indent>
-                                <tabs>true</tabs>
-                                <spacesPerTab>4</spacesPerTab>
-                            </indent>
-                        </format>
-                    </formats>
-                    <!-- define a language-specific format -->
 
-                    <markdown>
-                        <includes> <!-- You have to set the target manually -->
-                            <include>**/*.md</include>
-                        </includes>
-
-                        <flexmark/> <!-- has its own section below -->
-                    </markdown>
-
-
-                    <java>
-                        <!-- These are the defaults, you can override if you want -->
-                        <includes>
-                            <include>src/main/java/**/*.java</include>
-                            <include>src/test/java/**/*.java</include>
-                        </includes>
-
-                        <!-- Cleanthat will refactor your code, but it may break your style: apply it before your formatter -->
-                        <cleanthat />        <!-- has its own section below -->
-
-                        <googleJavaFormat>
-                            <version>${google-java-format.version}</version>                      <!-- optional, 1.8 is the minimum supported version for Java 11 -->
-                            <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
-                            <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
-                            <formatJavadoc>false</formatJavadoc>        <!-- optional -->
-                        </googleJavaFormat>
-
-                        <importOrder>  <!-- or a custom ordering -->
-                            <wildcardsLast>false</wildcardsLast> <!-- Optional, default false. Sort wildcard import after specific imports -->
-                            <order>java|javax,org,com,com.diffplug,,\#com.diffplug,\#</order>  <!-- or use <file>${project.basedir}/eclipse.importorder</file> -->
-                            <!-- you can use an empty string for all the imports you didn't specify explicitly, '|' to join group without blank line, and '\#` prefix for static imports. -->
-                            <semanticSort>false</semanticSort> <!-- Optional, default false. Sort by package, then class, then member (for static imports). Splitting is based on common conventions (packages are lower case, classes start with upper case). Use <treatAsPackage> and <treatAsClass> for exceptions. -->
-                            <treatAsPackage> <!-- Packages starting with upper case letters. -->
-                                <package>ch.denic0la.MyPackage</package>
-                            </treatAsPackage>
-                            <treatAsClass> <!-- Classes starting with lower case letters. -->
-                                <class>ch.denic0la.myClass</class>
-                            </treatAsClass>
-                        </importOrder>
-
-                        <removeUnusedImports /> <!-- self-explanatory -->
-                        <formatAnnotations />  <!-- fixes formatting of type annotations, see below -->
-                    </java>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>apply</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.14.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                https://github.com/DeNic0la/konfi-infra/raw/refs/tags/brunch-api/1.1.2/spec/Brunch.yaml
-                            </inputSpec>
-                            <skipValidateSpec>false</skipValidateSpec>
-                            <library>spring-boot</library>
-                            <verbose>false</verbose>
-                            <generatorName>spring</generatorName>
-                            <apiPackage>${openapi-generator.base-package}.api</apiPackage>
-                            <modelPackage>${openapi-generator.base-package}.model</modelPackage>
-                            <packageName>${openapi-generator.base-package}</packageName>
-                            <artifactId>brunch-generated</artifactId>
-                            <groupId>${project.groupId}</groupId>
-                            <configHelp>false</configHelp>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <artifactVersion>${project.version}</artifactVersion>
-                            <configOptions>
-                                <useSpringBoot3>true</useSpringBoot3>
-                                <generatorLanguage>Java</generatorLanguage>
-                                <generatorType>SERVER</generatorType>
-                                <useSpringController>true</useSpringController>
-                                <singleContentTypes>true</singleContentTypes>
-                                <returnSuccessCode>true</returnSuccessCode>
-
-                                <basePackage>${openapi-generator.base-package}</basePackage>
-
-                                <resourceFolder>src/main/resources</resourceFolder>
-                                <sourceFolder>src/main/java</sourceFolder>
-
-                                <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
-                                <generateConstructorWithAllArgs>false</generateConstructorWithAllArgs>
-                                <generateBuilders>true</generateBuilders>
-                                <additionalModelTypeAnnotations>@lombok.Data; @lombok.NoArgsConstructor; @lombok.ToString(callSuper=true, includeFieldNames=true) </additionalModelTypeAnnotations>
-                                <useTags>false</useTags>
-                                <title>Brunch</title>
-                                <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
-                                <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
-                                <useOptional>true</useOptional>
-                                <configPackage>${openapi-generator.base-package}.configuration</configPackage>
-                            </configOptions>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
