@@ -50,4 +50,9 @@ public class Brunch {
       fetch = FetchType.EAGER)
   @OrderBy("order ASC")
   private List<Question> questions = new ArrayList<>();
+
+  @ToString.Exclude
+  @OneToMany(mappedBy = "brunch", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<Vote> votes = new ArrayList<>();
+
 }
