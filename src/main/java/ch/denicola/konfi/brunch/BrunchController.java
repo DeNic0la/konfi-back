@@ -4,16 +4,22 @@ package ch.denicola.konfi.brunch;
 import ch.denic0la.openapi.konfi.brunch.api.BrunchApi;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
+import ch.denic0la.openapi.konfi.brunch.model.ErrorResponseDTO;
 import ch.denicola.konfi.brunch.data.Brunch;
 import ch.denicola.konfi.brunch.data.BrunchRepository;
 import ch.denicola.konfi.brunch.data.BrunchService;
 import jakarta.annotation.Resource;
 import lombok.extern.java.Log;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @Log
@@ -35,12 +41,24 @@ public class BrunchController implements BrunchApi {
     public ResponseEntity<BrunchInfoDTO> createBrunch(BrunchCreateDTO brunchCreateDTO) {
         // Check if brunch with the same ID already exists
         if (brunchRepository.existsById(brunchCreateDTO.getId())) {
-            return ResponseEntity.status(409).body(null); // Conflict
+            throw new ResponseStatusException(HttpStatusCode.valueOf(409), "Brunch with this ID already exists");
         }
         var brunch = brunchService.brunchCreateDTOToBrunch(brunchCreateDTO);
         log.info(brunch.toString());
         var saved = brunchRepository.save(brunch);
         var data = brunchService.brunchToBrunchInfoDTO(saved);
         return ResponseEntity.status(201).body(data);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getAllBrunches() {
+        return ResponseEntity.ok(brunchRepository.getAllBrunchIds());
+    }
+
+    @Override
+    public ResponseEntity<BrunchInfoDTO> getBrunchById(String brunchId) {
+        Brunch brunch = brunchRepository.findById(brunchId).orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
+        var data = brunchService.brunchToBrunchInfoDTO(brunch);
+        return ResponseEntity.ok(data);
     }
 }

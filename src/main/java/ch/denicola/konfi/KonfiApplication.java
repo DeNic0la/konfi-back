@@ -10,6 +10,8 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
@@ -23,7 +25,8 @@ import java.net.MalformedURLException;
         "ch.denicola.konfi",
         "ch.denicola.konfi.brunch",
         "ch.denicola.konfi.brunch.data"
-    })
+    },
+        exclude = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
 @EnableJpaRepositories
 public class KonfiApplication {
 
