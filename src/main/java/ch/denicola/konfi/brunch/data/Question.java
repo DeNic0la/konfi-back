@@ -21,11 +21,11 @@ public class Question {
     public static final String COLUMN_MIN_NAME = "min";
     public static final String COLUMN_MAX_NAME = "max";
     public static final String COLUMN_RECOMMENDED_NAME = "recommended";
-    public static final String COLUMN_ORDER_NAME = "order";
+    public static final String COLUMN_ORDER_NAME = "sort_order_number";
     public static final String COLUMN_OPTIONAL_NAME = "optional";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = COLUMN_ID_NAME, nullable = false)
     private Integer id;
 
