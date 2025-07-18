@@ -25,3 +25,30 @@ CREATE TABLE question
 
 ALTER TABLE question
     ADD CONSTRAINT FK_QUESTION_ON_BRUNCH FOREIGN KEY (brunch_id) REFERENCES brunch (id);
+
+CREATE TABLE vote
+(
+    id        INT AUTO_INCREMENT NOT NULL,
+    email     VARCHAR(255)       NULL,
+    name      VARCHAR(255)       NULL,
+    brunch_id VARCHAR(50)        NOT NULL,
+    CONSTRAINT pk_vote PRIMARY KEY (id)
+);
+
+ALTER TABLE vote
+    ADD CONSTRAINT FK_VOTE_ON_BRUNCH FOREIGN KEY (brunch_id) REFERENCES brunch (id);
+
+CREATE TABLE vote_answer
+(
+    id               INT AUTO_INCREMENT NOT NULL,
+    answer_to_id     INT                NOT NULL,
+    konfidence_value INT                NOT NULL,
+    vote_id          INT                NOT NULL,
+    CONSTRAINT pk_vote_answer PRIMARY KEY (id)
+);
+
+ALTER TABLE vote_answer
+    ADD CONSTRAINT FK_VOTE_ANSWER_ON_ANSWER_TO FOREIGN KEY (answer_to_id) REFERENCES question (id);
+
+ALTER TABLE vote_answer
+    ADD CONSTRAINT FK_VOTE_ANSWER_ON_VOTE FOREIGN KEY (vote_id) REFERENCES vote (id);
