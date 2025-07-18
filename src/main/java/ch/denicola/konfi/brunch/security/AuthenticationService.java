@@ -13,7 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Log
-@Service
 public class AuthenticationService {
   private static final String ADMIN_PASSWORD_HEADER_NAME="X-ADMIN-PASSWORD";
   private static final String VOTING_PASSWORD_HEADER_NAME="X-VOTING-PASSWORD";
@@ -38,9 +37,9 @@ public class AuthenticationService {
     var brunchId = getBrunchId(request);
     if (StringUtils.isBlank(brunchId)) return BrunchPasswordAuthenticationToken.forGuest(null);
     var adminHeader = request.getHeader(ADMIN_PASSWORD_HEADER_NAME);
-    if (StringUtils.isNoneBlank(adminHeader)) return BrunchPasswordAuthenticationToken.forAdmin(brunchId,adminHeader);
+    if (StringUtils.isNotBlank(adminHeader)) return BrunchPasswordAuthenticationToken.forAdmin(brunchId,adminHeader);
     var voterHeader = request.getHeader(VOTING_PASSWORD_HEADER_NAME);
-    if (StringUtils.isNoneBlank(voterHeader)) return BrunchPasswordAuthenticationToken.forVoter(brunchId,voterHeader);
+    if (StringUtils.isNotBlank(voterHeader)) return BrunchPasswordAuthenticationToken.forVoter(brunchId,voterHeader);
     return BrunchPasswordAuthenticationToken.forGuest(brunchId);
 
 

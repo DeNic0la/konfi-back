@@ -33,8 +33,6 @@ public class BrunchService {
 
     // Use JsonNullable wrappers
     dto.setEmailRegexp(JsonNullable.of(brunch.getEmailRegexp()));
-    dto.setAdminPassword(JsonNullable.of(brunch.getAdminPassword()));
-    dto.setVotingPassword(JsonNullable.of(brunch.getVotingPassword()));
 
     // Convert List<Question> to Set<BrunchQuestionInfoDTO>
     Set<BrunchQuestionInfoDTO> questionDTOs =
@@ -111,12 +109,12 @@ public class BrunchService {
         brunchCreate.getRequireEmail() != null ? brunchCreate.getRequireEmail() : false);
     brunch.setEmailRegexp(
         brunchCreate.getEmailRegexp().isPresent() ? brunchCreate.getEmailRegexp().get() : null);
-    brunch.setAdminPassword(
-        brunchCreate.getAdminPassword().isPresent() ? brunchCreate.getAdminPassword().get() : null);
-    brunch.setVotingPassword(
-        brunchCreate.getVotingPassword().isPresent()
-            ? brunchCreate.getVotingPassword().get()
-            : null);
+
+    var builtAuth = BrunchAuthorization.builder().brunch(brunch)
+            .brunch_id(brunchCreate.getId())
+            .adminPasswordHash(brunchCreate.getAdminPassword().orElse(null))
+            .votingPasswordHash(brunchCreate.getVotingPassword().orElse(null)).build();
+    brunch.setBrunchAuthorization(builtAuth);
 
     List<Question> questions =
         brunchCreate.getQuestions().stream()
