@@ -1,8 +1,23 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="konfi [spring-boot:run]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+  <configuration default="false" name="konfi [spring-boot:run:debug]" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
-      <option name="myRunnerSettings" />
+      <option name="myRunnerSettings">
+        <MavenRunnerSettings>
+          <option name="delegateBuildToMaven" value="false" />
+          <option name="environmentProperties">
+            <map />
+          </option>
+          <option name="jreName" value="#USE_PROJECT_JDK" />
+          <option name="mavenProperties">
+            <map />
+          </option>
+          <option name="passParentEnv" value="true" />
+          <option name="runMavenInBackground" value="true" />
+          <option name="skipTests" value="true" />
+          <option name="vmOptions" value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=6060" />
+        </MavenRunnerSettings>
+      </option>
       <option name="myRunnerParameters">
         <MavenRunnerParameters>
           <option name="cmdOptions" />

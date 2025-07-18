@@ -55,4 +55,7 @@ public class Brunch {
   @OneToMany(mappedBy = "brunch", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<Vote> votes = new ArrayList<>();
 
+  @OneToOne(mappedBy = "brunch", cascade = CascadeType.ALL, orphanRemoval = true)
+  private BrunchAuthorization brunchAuthorization;
+
 }
