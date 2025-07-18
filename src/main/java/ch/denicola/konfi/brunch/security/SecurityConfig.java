@@ -1,6 +1,8 @@
 package ch.denicola.konfi.brunch.security;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +11,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
@@ -27,9 +31,11 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-  @Bean
+
+    @Bean
   static RoleHierarchy roleHierarchy() {
     return RoleHierarchyImpl.withDefaultRolePrefix()
             .role("ADMIN").implies("VOTER")
@@ -38,20 +44,14 @@ public class SecurityConfig {
             .build();
   }
 
-  @Getter(lazy = true)
-  private static final PasswordEncoder passwordEncoder = generateDefaultPasswordEncoder();
 
-  private static PasswordEncoder generateDefaultPasswordEncoder() {
-    Map<String,PasswordEncoder> encoders = new HashMap<>();
-    encoders.put("bcrypt", new BCryptPasswordEncoder());
-    encoders.put("sha256", new StandardPasswordEncoder());
-    return new DelegatingPasswordEncoder("bcrypt", encoders);
-  }
+  @Autowired
+  private final BrunchPasswordAuthenticationProvider authProvider;
 
-  @Bean
-  public static PasswordEncoder passwordEncoder() {
-    return getPasswordEncoder();
-  }
+  @Autowired
+  private AuthenticationConfiguration authenticationConfiguration;
+
+
 
   @Bean
   @Order(3)
@@ -110,20 +110,22 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
             .securityMatcher(SECURITY_PATHS)
-            .addFilterBefore( new VoteAuthenticationFilter(), BasicAuthenticationFilter.class)//, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authProvider)
+            .addFilterBefore(new BrunchAuthenticationProcessingFilter(authenticationConfiguration.getAuthenticationManager()),BasicAuthenticationFilter.class)
+            //.addFilterBefore( new VoteAuthenticationFilter(), BasicAuthenticationFilter.class)//, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(
             authz ->
                     authz
                     .requestMatchers(SECURITY_PATHS).authenticated()
                     )
-        .httpBasic(Customizer.withDefaults())
-        .sessionManagement(
+        .httpBasic(Customizer.withDefaults());
+        /*.sessionManagement(
             httpSecuritySessionManagementConfigurer ->
                 httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS));
+                    SessionCreationPolicy.STATELESS));*/
     return http.build();
   }
-
+/*
   @Bean
   @Order(10)
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -140,5 +142,5 @@ public class SecurityConfig {
         .addFilterBefore(
             new VoteAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
-  }
+  }*/
 }

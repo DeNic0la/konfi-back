@@ -4,18 +4,19 @@ CREATE TABLE brunch
     title           VARCHAR(255) NOT NULL,
     require_email   BIT(1) DEFAULT 0 NULL,
     email_regexp    VARCHAR(255) NULL,
-    admin_password  VARCHAR(255) NULL,
-    voting_password VARCHAR(255) NULL,
     CONSTRAINT pk_brunch PRIMARY KEY (id)
 );
 CREATE TABLE brunch_authorization
 (
-    brunch_id VARCHAR(50) NOT NULL,
+    brunch_id            VARCHAR(50) NOT NULL,
+    admin_password_hash  VARCHAR(60) NULL,
+    voting_password_hash VARCHAR(60) NULL,
     CONSTRAINT pk_brunch_authorization PRIMARY KEY (brunch_id)
 );
 
 ALTER TABLE brunch_authorization
     ADD CONSTRAINT FK_BRUNCH_AUTHORIZATION_ON_BRUNCH FOREIGN KEY (brunch_id) REFERENCES brunch (id);
+
 CREATE TABLE question
 (
     id          INT AUTO_INCREMENT NOT NULL,
@@ -62,5 +63,5 @@ ALTER TABLE vote_answer
 
 
 
-insert into mydatabase.brunch (id, title, require_email, email_regexp, admin_password, voting_password)
-values  ('PI-25-3-Rudolf', 'Planning 25-3 Team Rudolf Confidence Voting', false, null, 'admin123', null);
+insert into mydatabase.brunch (id, title, require_email, email_regexp)
+values  ('PI-25-3-Rudolf', 'Planning 25-3 Team Rudolf Confidence Voting', false, null);

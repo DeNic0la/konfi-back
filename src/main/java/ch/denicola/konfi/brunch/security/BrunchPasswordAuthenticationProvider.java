@@ -1,5 +1,6 @@
 package ch.denicola.konfi.brunch.security;
 
+import ch.denicola.konfi.KonfiApplication;
 import ch.denicola.konfi.brunch.data.BrunchAuthorization;
 import ch.denicola.konfi.brunch.data.BrunchAuthorizationRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.InjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -19,10 +21,11 @@ import java.util.function.Supplier;
 @Component
 @Log
 @RequiredArgsConstructor
+@Primary
 public class BrunchPasswordAuthenticationProvider implements AuthenticationProvider {
 
     private final BrunchAuthorizationRepository authorizationRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder = KonfiApplication.getPasswordEncoder();
     private Authentication handleBlankBrunchId(){
         return null;
     }
@@ -67,12 +70,20 @@ public class BrunchPasswordAuthenticationProvider implements AuthenticationProvi
     }
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        log.info("Authenticating: " + authentication.getName());
         if (authentication instanceof BrunchPasswordAuthenticationToken token){
             var brunchId = token.getPrincipal();
             if (StringUtils.isBlank(brunchId)) return handleBlankBrunchId();
+            try {
             var brunchAuthorization = authorizationRepository.findById(brunchId).orElseGet(getSupplierForBrunchId(brunchId));
             log.info("Authenticating for brunch: " + brunchId);
-            return runAuthentication(brunchAuthorization,token);
+
+                return runAuthentication(brunchAuthorization,token);
+            } catch (Exception e) {
+                log.severe(e.getMessage());
+                log.info(e.getLocalizedMessage());
+                throw e;
+            }
         }
         else {
             return null;
@@ -81,6 +92,7 @@ public class BrunchPasswordAuthenticationProvider implements AuthenticationProvi
 
     @Override
     public boolean supports(Class<?> authentication) {
+        log.info(authentication.getName());
         return BrunchPasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

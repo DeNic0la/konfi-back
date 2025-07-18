@@ -20,8 +20,6 @@ public class Brunch {
   public static final String COLUMN_TITLE_NAME = "title";
   public static final String COLUMN_REQUIREEMAIL_NAME = "require_email";
   public static final String COLUMN_EMAILREGEXP_NAME = "email_regexp";
-  public static final String COLUMN_ADMINPASSWORD_NAME = "admin_password";
-  public static final String COLUMN_VOTINGPASSWORD_NAME = "voting_password";
 
   @Id
   @Column(name = COLUMN_ID_NAME, nullable = false, length = 50)
@@ -36,12 +34,6 @@ public class Brunch {
   @Column(name = COLUMN_EMAILREGEXP_NAME)
   private String emailRegexp;
 
-  @Column(name = COLUMN_ADMINPASSWORD_NAME)
-  private String adminPassword;
-
-  @Column(name = COLUMN_VOTINGPASSWORD_NAME)
-  private String votingPassword;
-
   @ToString.Exclude
   @OneToMany(
       mappedBy = "brunch",
@@ -55,7 +47,7 @@ public class Brunch {
   @OneToMany(mappedBy = "brunch", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<Vote> votes = new ArrayList<>();
 
-  @OneToOne(mappedBy = "brunch", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToOne(mappedBy = "brunch", cascade = {CascadeType.REMOVE},optional = true, orphanRemoval = true)
   private BrunchAuthorization brunchAuthorization;
 
 }

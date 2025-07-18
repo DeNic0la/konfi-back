@@ -1,7 +1,10 @@
 package ch.denicola.konfi;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 
+import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.openapitools.jackson.nullable.JsonNullableModule;
@@ -19,6 +22,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionDTO;
 import ch.denicola.konfi.brunch.data.Question;
 import org.springframework.security.core.annotation.AnnotationTemplateExpressionDefaults;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 
 @SpringBootApplication(
@@ -30,6 +37,24 @@ import org.springframework.security.data.repository.query.SecurityEvaluationCont
     exclude = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
 @EnableJpaRepositories
 public class KonfiApplication {
+
+    @Getter(lazy = true)
+    private static final PasswordEncoder passwordEncoder = generateDefaultPasswordEncoder();
+
+    private static PasswordEncoder generateDefaultPasswordEncoder() {
+        Map<String,PasswordEncoder> encoders = new HashMap<>();
+        encoders.put("bcrypt", new BCryptPasswordEncoder());
+        encoders.put("sha256", new StandardPasswordEncoder());
+        return new DelegatingPasswordEncoder("bcrypt", encoders);
+
+    }
+
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+        return getPasswordEncoder();
+    }
+
+    /*
     @Bean
     public SecurityEvaluationContextExtension expressionEvaluationContextProvider() {
         return new SecurityEvaluationContextExtension();
@@ -39,7 +64,7 @@ public class KonfiApplication {
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     static AnnotationTemplateExpressionDefaults templateDefaults() {
         return new AnnotationTemplateExpressionDefaults();
-    }
+    }*/
 
   @Bean
   public ModelMapper modelMapper() {

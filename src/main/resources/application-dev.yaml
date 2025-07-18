@@ -20,4 +20,7 @@ management:
       base-path: /actuator
 logging:
   level:
-    root: debug
+    ch: debug
+    sql: error
+    web: info
+
