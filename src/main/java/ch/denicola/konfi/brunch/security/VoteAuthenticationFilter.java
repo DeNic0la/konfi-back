@@ -2,13 +2,7 @@ package ch.denicola.konfi.brunch.security;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import lombok.Getter;
-import lombok.extern.java.Log;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +14,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.servlet.HandlerMapping;
+import lombok.extern.java.Log;
 
 @Log
 public class VoteAuthenticationFilter extends GenericFilterBean {

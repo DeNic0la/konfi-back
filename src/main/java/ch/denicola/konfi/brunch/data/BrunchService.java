@@ -110,10 +110,13 @@ public class BrunchService {
     brunch.setEmailRegexp(
         brunchCreate.getEmailRegexp().isPresent() ? brunchCreate.getEmailRegexp().get() : null);
 
-    var builtAuth = BrunchAuthorization.builder().brunch(brunch)
+    var builtAuth =
+        BrunchAuthorization.builder()
+            .brunch(brunch)
             .brunch_id(brunchCreate.getId())
             .adminPasswordHash(brunchCreate.getAdminPassword().orElse(null))
-            .votingPasswordHash(brunchCreate.getVotingPassword().orElse(null)).build();
+            .votingPasswordHash(brunchCreate.getVotingPassword().orElse(null))
+            .build();
     brunch.setBrunchAuthorization(builtAuth);
 
     List<Question> questions =

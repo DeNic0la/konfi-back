@@ -44,10 +44,17 @@ public class Brunch {
   private List<Question> questions = new ArrayList<>();
 
   @ToString.Exclude
-  @OneToMany(mappedBy = "brunch", cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(
+      mappedBy = "brunch",
+      cascade = {CascadeType.REMOVE, CascadeType.REFRESH},
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
   private List<Vote> votes = new ArrayList<>();
 
-  @OneToOne(mappedBy = "brunch", cascade = {CascadeType.REMOVE},optional = true, orphanRemoval = true)
+  @OneToOne(
+      mappedBy = "brunch",
+      cascade = {CascadeType.REMOVE},
+      optional = true,
+      orphanRemoval = true)
   private BrunchAuthorization brunchAuthorization;
-
 }
