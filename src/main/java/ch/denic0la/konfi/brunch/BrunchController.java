@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ch.denic0la.openapi.konfi.brunch.api.BrunchApi;
-import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
-import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
 import ch.denic0la.konfi.brunch.data.Brunch;
 import ch.denic0la.konfi.brunch.data.BrunchRepository;
 import ch.denic0la.konfi.brunch.data.BrunchService;
+import ch.denic0la.openapi.konfi.brunch.api.BrunchApi;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
 import lombok.extern.java.Log;
 
 @RestController
