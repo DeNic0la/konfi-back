@@ -33,10 +33,11 @@ public class Vote {
 
   @ToString.Exclude
   @OneToMany(mappedBy = "vote", orphanRemoval = true)
+  @Builder.Default
   private List<VoteAnswer> voteAnswers = new ArrayList<>();
 
   @ToString.Exclude
-  @ManyToOne(cascade = CascadeType.REMOVE, optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "brunch_id", nullable = false)
   private Brunch brunch;
 }

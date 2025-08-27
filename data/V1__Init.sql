@@ -63,5 +63,5 @@ ALTER TABLE vote_answer
 
 
 
-insert into mydatabase.brunch (id, title, require_email, email_regexp)
+insert into brunch (id, title, require_email, email_regexp)
 values  ('PI-25-3-Rudolf', 'Planning 25-3 Team Rudolf Confidence Voting', false, null);

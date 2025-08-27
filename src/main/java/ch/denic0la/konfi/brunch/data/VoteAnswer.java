@@ -34,7 +34,7 @@ public class VoteAnswer {
   private Integer konfidenceValue;
 
   @ToString.Exclude
-  @ManyToOne(cascade = CascadeType.ALL, optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "vote_id", nullable = false)
   private Vote vote;
 

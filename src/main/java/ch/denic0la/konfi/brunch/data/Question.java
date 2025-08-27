@@ -47,7 +47,7 @@ public class Question {
   @Column(name = COLUMN_ORDER_NAME)
   private Integer order;
 
-  @ManyToOne(cascade = CascadeType.ALL, optional = false)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "brunch_id", nullable = false)
   private Brunch brunch;
 

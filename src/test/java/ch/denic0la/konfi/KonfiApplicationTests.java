@@ -2,12 +2,10 @@ package ch.denic0la.konfi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@Profile("test")
-@Import(TestcontainersConfiguration.class)
+@SpringBootTest(properties = {"spring.profiles.active=test"})
+@ActiveProfiles("test")
 class KonfiApplicationTests {
 
   @Test
