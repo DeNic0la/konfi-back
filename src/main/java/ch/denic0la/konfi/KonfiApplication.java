@@ -99,9 +99,7 @@ public class KonfiApplication {
   @Bean
   @Primary
   public Jackson2ObjectMapperBuilder customObjectMapper() {
-    return new Jackson2ObjectMapperBuilder()
-        // other configs are possible
-        .modules(new JsonNullableModule());
+    return new Jackson2ObjectMapperBuilder().modules(new JsonNullableModule());
   }
 
   public static void main(String[] args) {

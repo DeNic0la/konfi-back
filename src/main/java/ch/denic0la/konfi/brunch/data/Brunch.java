@@ -12,6 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 @Entity
 @Table(name = Brunch.TABLE_NAME)
 public class Brunch {
@@ -41,6 +42,7 @@ public class Brunch {
       orphanRemoval = true,
       fetch = FetchType.EAGER)
   @OrderBy("order ASC")
+  @Builder.Default
   private List<Question> questions = new ArrayList<>();
 
   @ToString.Exclude
@@ -49,6 +51,7 @@ public class Brunch {
       cascade = {CascadeType.REMOVE, CascadeType.REFRESH},
       orphanRemoval = true,
       fetch = FetchType.LAZY)
+  @Builder.Default
   private List<Vote> votes = new ArrayList<>();
 
   @OneToOne(

@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Profile;
 public class TestKonfiApplication {
 
   public static void main(String[] args) {
-    SpringApplication.from(KonfiApplication::main)
-        .with(TestcontainersConfiguration.class)
-        .run(args);
+    SpringApplication.from(KonfiApplication::main).run(args);
   }
 }
