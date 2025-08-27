@@ -20,15 +20,15 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
-import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionDTO;
 import ch.denic0la.konfi.brunch.data.Question;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionDTO;
 import lombok.Getter;
 
 @SpringBootApplication(
     scanBasePackages = {
-      "ch.denicola.konfi",
-      "ch.denicola.konfi.brunch",
-      "ch.denicola.konfi.brunch.data"
+      "ch.denic0la.konfi",
+      "ch.denic0la.konfi.brunch",
+      "ch.denic0la.konfi.brunch.data"
     },
     exclude = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
 @EnableJpaRepositories
