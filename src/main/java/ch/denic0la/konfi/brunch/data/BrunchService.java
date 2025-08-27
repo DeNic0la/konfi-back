@@ -12,10 +12,13 @@ import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ch.denic0la.openapi.konfi.brunch.model.BrunchAnswerDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionInfoDTO;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchUpdateDTO;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchVoteDTO;
 import lombok.extern.java.Log;
 
 @Service("brunchService")
@@ -23,6 +26,9 @@ import lombok.extern.java.Log;
 public class BrunchService {
 
   @Autowired private ModelMapper modelMapper;
+  @Autowired private VoteRepository voteRepository;
+  @Autowired private QuestionRepository questionRepository;
+  @Autowired private VoteAnswerRepository voteAnswerRepository;
 
   public BrunchInfoDTO brunchToBrunchInfoDTO(Brunch brunch) {
     BrunchInfoDTO dto = new BrunchInfoDTO();
@@ -156,5 +162,105 @@ public class BrunchService {
     brunch.setQuestions(questions);
 
     return brunch;
+  }
+
+  public Brunch updateBrunch(Brunch existingBrunch, BrunchUpdateDTO updateDTO) {
+    // Update basic fields if present
+    if (updateDTO.getTitle() != null) {
+      existingBrunch.setTitle(updateDTO.getTitle());
+    }
+    if (updateDTO.getRequireEmail() != null) {
+      existingBrunch.setRequireEmail(updateDTO.getRequireEmail());
+    }
+    if (updateDTO.getEmailRegexp() != null && updateDTO.getEmailRegexp().isPresent()) {
+      existingBrunch.setEmailRegexp(updateDTO.getEmailRegexp().get());
+    } else if (updateDTO.getEmailRegexp() != null) {
+      existingBrunch.setEmailRegexp(null);
+    }
+
+    // Update questions if present
+    if (updateDTO.getQuestions() != null) {
+      // Clear existing questions
+      existingBrunch.getQuestions().clear();
+
+      // Add new questions
+      List<Question> newQuestions =
+          updateDTO.getQuestions().stream()
+              .map(q -> mapToQuestionEntity(q, existingBrunch))
+              .sorted(
+                  Comparator.comparing(
+                      Question::getOrder, Comparator.nullsLast(Comparator.naturalOrder())))
+              .collect(Collectors.toList());
+
+      existingBrunch.setQuestions(newQuestions);
+    }
+
+    // Update passwords if present
+    if (existingBrunch.getBrunchAuthorization() != null) {
+      BrunchAuthorization auth = existingBrunch.getBrunchAuthorization();
+      if (updateDTO.getAdminPassword() != null && updateDTO.getAdminPassword().isPresent()) {
+        auth.setAdminPasswordHash(updateDTO.getAdminPassword().get());
+      }
+      if (updateDTO.getVotingPassword() != null && updateDTO.getVotingPassword().isPresent()) {
+        auth.setVotingPasswordHash(updateDTO.getVotingPassword().get());
+      }
+    }
+
+    return existingBrunch;
+  }
+
+  public Vote brunchVoteDTOToVote(BrunchVoteDTO voteDTO, Brunch brunch) {
+    Vote vote = new Vote();
+    vote.setName(voteDTO.getName());
+    vote.setBrunch(brunch);
+
+    if (voteDTO.getEmail() != null && voteDTO.getEmail().isPresent()) {
+      vote.setEmail(voteDTO.getEmail().get());
+    }
+
+    List<VoteAnswer> voteAnswers = new ArrayList<>();
+    if (voteDTO.getAnswers() != null) {
+      for (BrunchAnswerDTO answerDTO : voteDTO.getAnswers()) {
+        VoteAnswer voteAnswer = new VoteAnswer();
+        voteAnswer.setVote(vote);
+        voteAnswer.setKonfidenceValue(answerDTO.getValue());
+
+        // Find the question by ID
+        Question question =
+            questionRepository
+                .findById(answerDTO.getQuestionId())
+                .orElseThrow(
+                    () ->
+                        new IllegalArgumentException(
+                            "Question not found: " + answerDTO.getQuestionId()));
+        voteAnswer.setAnswerTo(question);
+
+        voteAnswers.add(voteAnswer);
+      }
+    }
+    vote.setVoteAnswers(voteAnswers);
+
+    return vote;
+  }
+
+  public BrunchVoteDTO voteToBrunchVoteDTO(Vote vote) {
+    BrunchVoteDTO dto = new BrunchVoteDTO();
+    dto.setName(vote.getName());
+    dto.setEmail(JsonNullable.of(vote.getEmail()));
+
+    List<BrunchAnswerDTO> answerDTOs =
+        vote.getVoteAnswers().stream()
+            .map(this::voteAnswerToBrunchAnswerDTO)
+            .collect(Collectors.toList());
+    dto.setAnswers(answerDTOs);
+
+    return dto;
+  }
+
+  private BrunchAnswerDTO voteAnswerToBrunchAnswerDTO(VoteAnswer voteAnswer) {
+    BrunchAnswerDTO dto = new BrunchAnswerDTO();
+    dto.setQuestionId(voteAnswer.getAnswerTo().getId());
+    dto.setValue(voteAnswer.getKonfidenceValue());
+    return dto;
   }
 }

@@ -15,9 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 import ch.denic0la.konfi.brunch.data.Brunch;
 import ch.denic0la.konfi.brunch.data.BrunchRepository;
 import ch.denic0la.konfi.brunch.data.BrunchService;
+import ch.denic0la.konfi.brunch.security.BrunchPasswordAuthenticationToken;
 import ch.denic0la.openapi.konfi.brunch.api.BrunchApi;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
+import ch.denic0la.openapi.konfi.brunch.model.BrunchUpdateDTO;
 import lombok.extern.java.Log;
 
 @RestController
@@ -64,5 +66,53 @@ public class BrunchController implements BrunchApi {
                 () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
     var data = brunchService.brunchToBrunchInfoDTO(brunch);
     return ResponseEntity.ok(data);
+  }
+
+  @Override
+  public ResponseEntity<BrunchInfoDTO> updateBrunchById(
+      String brunchId, BrunchUpdateDTO brunchUpdateDTO) {
+    // Check authentication
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (!(auth instanceof BrunchPasswordAuthenticationToken token)
+        || !token.isAuthenticated()
+        || !token.isAdmin()) {
+      throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Admin access required");
+    }
+
+    // Find existing brunch
+    Brunch existingBrunch =
+        brunchRepository
+            .findById(brunchId)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
+
+    // Update brunch
+    Brunch updatedBrunch = brunchService.updateBrunch(existingBrunch, brunchUpdateDTO);
+    Brunch savedBrunch = brunchRepository.save(updatedBrunch);
+
+    // Return updated data
+    BrunchInfoDTO responseDTO = brunchService.brunchToBrunchInfoDTO(savedBrunch);
+    return ResponseEntity.ok(responseDTO);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteBrunchById(String brunchId) {
+    // Check authentication first
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (!(auth instanceof BrunchPasswordAuthenticationToken token)
+        || !token.isAuthenticated()
+        || !token.isAdmin()) {
+      throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Admin access required");
+    }
+
+    // Check if brunch exists
+    if (!brunchRepository.existsById(brunchId)) {
+      throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found");
+    }
+
+    // Delete brunch (cascade will handle related entities)
+    brunchRepository.deleteById(brunchId);
+
+    return ResponseEntity.noContent().build();
   }
 }
