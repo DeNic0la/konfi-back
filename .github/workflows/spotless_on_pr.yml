@@ -19,8 +19,8 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 24
-      - run: mvn install -DskipTests=true
-      - run: mvn spotless:apply
+      - run: mvn install -DskipTests=true -Pspotless
+      - run: mvn spotless:apply -Pspotless
       - uses: stefanzweifel/git-auto-commit-action@v6
         with:
 
