@@ -94,32 +94,12 @@ public class SecurityConfig {
             new BrunchAuthenticationProcessingFilter(
                 authenticationConfiguration.getAuthenticationManager()),
             BasicAuthenticationFilter.class)
-        // .addFilterBefore( new VoteAuthenticationFilter(), BasicAuthenticationFilter.class)//,
-        // UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(authz -> authz.requestMatchers(SECURITY_PATHS).authenticated())
-        .httpBasic(Customizer.withDefaults());
-    /*.sessionManagement(
-    httpSecuritySessionManagementConfigurer ->
-        httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS));*/
-    return http.build();
-  }
-  /*
-  @Bean
-  @Order(10)
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
-        .cors(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(
-            authorizationManagerRequestMatcherRegistry ->
-                authorizationManagerRequestMatcherRegistry.requestMatchers("/**").authenticated())
         .httpBasic(Customizer.withDefaults())
         .sessionManagement(
             httpSecuritySessionManagementConfigurer ->
                 httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS))
-        .addFilterBefore(
-            new VoteAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                    SessionCreationPolicy.STATELESS));
     return http.build();
-  }*/
+  }
 }

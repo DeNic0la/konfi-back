@@ -61,7 +61,7 @@ public class BrunchController implements BrunchApi {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     Brunch brunch =
         brunchRepository
-            .findById(brunchId)
+            .findByIdWithQuestions(brunchId)
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
     var data = brunchService.brunchToBrunchInfoDTO(brunch);
@@ -79,19 +79,8 @@ public class BrunchController implements BrunchApi {
       throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Admin access required");
     }
 
-    // Find existing brunch
-    Brunch existingBrunch =
-        brunchRepository
-            .findById(brunchId)
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
-
-    // Update brunch
-    Brunch updatedBrunch = brunchService.updateBrunch(existingBrunch, brunchUpdateDTO);
-    Brunch savedBrunch = brunchRepository.save(updatedBrunch);
-
-    // Return updated data
-    BrunchInfoDTO responseDTO = brunchService.brunchToBrunchInfoDTO(savedBrunch);
+    // Update brunch using management service
+    BrunchInfoDTO responseDTO = brunchService.updateBrunch(brunchId, brunchUpdateDTO);
     return ResponseEntity.ok(responseDTO);
   }
 

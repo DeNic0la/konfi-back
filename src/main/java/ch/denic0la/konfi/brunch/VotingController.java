@@ -39,10 +39,10 @@ public class VotingController implements VotingApi {
       throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Authentication required");
     }
 
-    // Find brunch
+    // Find brunch with questions for validation
     Brunch brunch =
         brunchRepository
-            .findById(brunchId)
+            .findByIdWithQuestions(brunchId)
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
 
@@ -101,10 +101,10 @@ public class VotingController implements VotingApi {
       throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Admin access required");
     }
 
-    // Find brunch
+    // Find brunch with votes for results
     Brunch brunch =
         brunchRepository
-            .findById(brunchId)
+            .findByIdWithQuestionsAndVotes(brunchId)
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Brunch not found"));
 

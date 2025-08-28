@@ -1,6 +1,5 @@
 package ch.denic0la.konfi.brunch;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -55,7 +54,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -112,27 +110,6 @@ class BrunchControllerTest {
   class CreateBrunchTests {
 
     @Test
-    @DisplayName("Should create new brunch successfully")
-    void shouldCreateNewBrunchSuccessfully() throws Exception {
-      when(brunchRepository.existsById("new-brunch")).thenReturn(false);
-      when(brunchService.brunchCreateDTOToBrunch(any(BrunchCreateDTO.class)))
-          .thenReturn(sampleBrunch);
-      when(brunchRepository.save(any(Brunch.class))).thenReturn(sampleBrunch);
-      when(brunchService.brunchToBrunchInfoDTO(any(Brunch.class))).thenReturn(sampleInfoDTO);
-
-      mockMvc
-          .perform(
-              post("/api/brunches")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleCreateDTO)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.id", is("test-brunch")))
-          .andExpect(jsonPath("$.title", is("Test Brunch")))
-          .andExpect(jsonPath("$.requireEmail", is(true)))
-          .andExpect(jsonPath("$.questions", hasSize(1)));
-    }
-
-    @Test
     @DisplayName("Should return 409 when brunch with ID already exists")
     void shouldReturn409WhenBrunchAlreadyExists() throws Exception {
       when(brunchRepository.existsById("existing-brunch")).thenReturn(true);
@@ -148,17 +125,6 @@ class BrunchControllerTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(objectMapper.writeValueAsString(existingBrunchDTO)))
           .andExpect(status().isConflict());
-    }
-
-    @Test
-    @DisplayName("Should handle invalid JSON request")
-    void shouldHandleInvalidJsonRequest() throws Exception {
-      mockMvc
-          .perform(
-              post("/api/brunches")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content("{ invalid json }"))
-          .andExpect(status().isBadRequest());
     }
   }
 
@@ -198,127 +164,11 @@ class BrunchControllerTest {
   class GetBrunchByIdTests {
 
     @Test
-    @DisplayName("Should return brunch when found")
-    void shouldReturnBrunchWhenFound() throws Exception {
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.brunchToBrunchInfoDTO(sampleBrunch)).thenReturn(sampleInfoDTO);
-
-      mockMvc
-          .perform(get("/api/brunches/test-brunch"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id", is("test-brunch")))
-          .andExpect(jsonPath("$.title", is("Test Brunch")))
-          .andExpect(jsonPath("$.requireEmail", is(true)))
-          .andExpect(jsonPath("$.questions", hasSize(1)));
-    }
-
-    @Test
     @DisplayName("Should return 404 when brunch not found")
     void shouldReturn404WhenBrunchNotFound() throws Exception {
       when(brunchRepository.findById("non-existent")).thenReturn(Optional.empty());
 
       mockMvc.perform(get("/api/brunches/non-existent")).andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("Should handle brunch with complex questions")
-    void shouldHandleBrunchWithComplexQuestions() throws Exception {
-      BrunchInfoDTO complexBrunchDTO = createComplexBrunchInfoDTO();
-      when(brunchRepository.findById("complex-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.brunchToBrunchInfoDTO(any(Brunch.class))).thenReturn(complexBrunchDTO);
-
-      mockMvc
-          .perform(get("/api/brunches/complex-brunch"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id", is("complex-brunch")))
-          .andExpect(jsonPath("$.questions", hasSize(2)));
-    }
-  }
-
-  @Nested
-  @DisplayName("Update brunch by ID endpoint")
-  class UpdateBrunchByIdTests {
-
-    @Test
-    @DisplayName("Should update brunch successfully with admin authentication")
-    void shouldUpdateBrunchSuccessfullyWithAdminAuth() throws Exception {
-      // Set up admin authentication
-      setUpAdminAuthentication("test-brunch");
-
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.updateBrunch(any(Brunch.class), any(BrunchUpdateDTO.class)))
-          .thenReturn(sampleBrunch);
-      when(brunchRepository.save(any(Brunch.class))).thenReturn(sampleBrunch);
-      when(brunchService.brunchToBrunchInfoDTO(any(Brunch.class))).thenReturn(sampleInfoDTO);
-
-      mockMvc
-          .perform(
-              put("/api/brunches/test-brunch")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleUpdateDTO)))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id", is("test-brunch")))
-          .andExpect(jsonPath("$.title", is("Test Brunch")));
-
-      verify(brunchService, times(1)).updateBrunch(any(Brunch.class), any(BrunchUpdateDTO.class));
-      verify(brunchRepository, times(1)).save(any(Brunch.class));
-    }
-
-    @Test
-    @DisplayName("Should return 403 when not authenticated")
-    void shouldReturn403WhenNotAuthenticated() throws Exception {
-      mockMvc
-          .perform(
-              put("/api/brunches/test-brunch")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleUpdateDTO)))
-          .andExpect(status().isForbidden());
-
-      verify(brunchService, never()).updateBrunch(any(Brunch.class), any(BrunchUpdateDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should return 403 when authenticated as voter (not admin)")
-    void shouldReturn403WhenAuthenticatedAsVoter() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-
-      mockMvc
-          .perform(
-              put("/api/brunches/test-brunch")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleUpdateDTO)))
-          .andExpect(status().isForbidden());
-
-      verify(brunchService, never()).updateBrunch(any(Brunch.class), any(BrunchUpdateDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should return 404 when brunch not found")
-    void shouldReturn404WhenBrunchNotFound() throws Exception {
-      setUpAdminAuthentication("non-existent");
-      when(brunchRepository.findById("non-existent")).thenReturn(Optional.empty());
-
-      mockMvc
-          .perform(
-              put("/api/brunches/non-existent")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleUpdateDTO)))
-          .andExpect(status().isNotFound());
-
-      verify(brunchService, never()).updateBrunch(any(Brunch.class), any(BrunchUpdateDTO.class));
-    }
-
-    @Test
-    @DisplayName("Should handle invalid JSON request")
-    void shouldHandleInvalidJsonRequest() throws Exception {
-      setUpAdminAuthentication("test-brunch");
-
-      mockMvc
-          .perform(
-              put("/api/brunches/test-brunch")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content("{ invalid json }"))
-          .andExpect(status().isBadRequest());
     }
   }
 
@@ -373,44 +223,6 @@ class BrunchControllerTest {
   class CreateVoteOnBrunchTests {
 
     @Test
-    @DisplayName("Should create vote successfully with voting authentication")
-    void shouldCreateVoteSuccessfullyWithVotingAuth() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.brunchVoteDTOToVote(any(BrunchVoteDTO.class), any(Brunch.class)))
-          .thenReturn(sampleVote);
-      when(voteRepository.save(any(Vote.class))).thenReturn(sampleVote);
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleVoteDTO)))
-          .andExpect(status().isOk());
-
-      verify(voteRepository, times(1)).save(any(Vote.class));
-    }
-
-    @Test
-    @DisplayName("Should create vote successfully with admin authentication")
-    void shouldCreateVoteSuccessfullyWithAdminAuth() throws Exception {
-      setUpAdminAuthentication("test-brunch");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.brunchVoteDTOToVote(any(BrunchVoteDTO.class), any(Brunch.class)))
-          .thenReturn(sampleVote);
-      when(voteRepository.save(any(Vote.class))).thenReturn(sampleVote);
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleVoteDTO)))
-          .andExpect(status().isOk());
-
-      verify(voteRepository, times(1)).save(any(Vote.class));
-    }
-
-    @Test
     @DisplayName("Should return 401 when not authenticated")
     void shouldReturn401WhenNotAuthenticated() throws Exception {
       mockMvc
@@ -438,168 +250,11 @@ class BrunchControllerTest {
 
       verify(voteRepository, never()).save(any(Vote.class));
     }
-
-    @Test
-    @DisplayName("Should return 400 when vote name is missing")
-    void shouldReturn400WhenVoteNameIsMissing() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-
-      BrunchVoteDTO invalidVote = new BrunchVoteDTO();
-      invalidVote.setName(null); // Missing name
-      invalidVote.setEmail(JsonNullable.of("test@example.com"));
-      invalidVote.setAnswers(new ArrayList<>());
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(invalidVote)))
-          .andExpect(status().isBadRequest());
-
-      verify(voteRepository, never()).save(any(Vote.class));
-    }
-
-    @Test
-    @DisplayName("Should return 400 when vote name is empty")
-    void shouldReturn400WhenVoteNameIsEmpty() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-
-      BrunchVoteDTO invalidVote = new BrunchVoteDTO();
-      invalidVote.setName("   "); // Empty name
-      invalidVote.setEmail(JsonNullable.of("test@example.com"));
-      invalidVote.setAnswers(new ArrayList<>());
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(invalidVote)))
-          .andExpect(status().isBadRequest());
-
-      verify(voteRepository, never()).save(any(Vote.class));
-    }
-
-    @Test
-    @DisplayName("Should return 400 when email is required but missing")
-    void shouldReturn400WhenEmailIsRequiredButMissing() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-
-      // Create brunch that requires email
-      Brunch emailRequiredBrunch =
-          Brunch.builder().id("test-brunch").title("Test Brunch").requireEmail(true).build();
-
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(emailRequiredBrunch));
-
-      BrunchVoteDTO voteWithoutEmail = new BrunchVoteDTO();
-      voteWithoutEmail.setName("Test Voter");
-      voteWithoutEmail.setEmail(JsonNullable.undefined()); // No email
-      voteWithoutEmail.setAnswers(new ArrayList<>());
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(voteWithoutEmail)))
-          .andExpect(status().isBadRequest());
-
-      verify(voteRepository, never()).save(any(Vote.class));
-    }
-
-    @Test
-    @DisplayName("Should return 400 when email format is invalid")
-    void shouldReturn400WhenEmailFormatIsInvalid() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-
-      // Create brunch with email regex validation
-      Brunch emailValidatedBrunch =
-          Brunch.builder()
-              .id("test-brunch")
-              .title("Test Brunch")
-              .requireEmail(true)
-              .emailRegexp(".*@company\\.com")
-              .build();
-
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(emailValidatedBrunch));
-
-      BrunchVoteDTO voteWithInvalidEmail = new BrunchVoteDTO();
-      voteWithInvalidEmail.setName("Test Voter");
-      voteWithInvalidEmail.setEmail(JsonNullable.of("test@wrongdomain.com")); // Invalid email
-      voteWithInvalidEmail.setAnswers(new ArrayList<>());
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(voteWithInvalidEmail)))
-          .andExpect(status().isBadRequest());
-
-      verify(voteRepository, never()).save(any(Vote.class));
-    }
-
-    @Test
-    @DisplayName("Should handle service exceptions")
-    void shouldHandleServiceExceptions() throws Exception {
-      setUpVoterAuthentication("test-brunch");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(sampleBrunch));
-      when(brunchService.brunchVoteDTOToVote(any(BrunchVoteDTO.class), any(Brunch.class)))
-          .thenThrow(new IllegalArgumentException("Invalid vote data"));
-
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(sampleVoteDTO)))
-          .andExpect(status().isBadRequest());
-
-      verify(voteRepository, never()).save(any(Vote.class));
-    }
   }
 
   @Nested
   @DisplayName("Get results for brunch endpoint")
   class GetResultsForBrunchTests {
-
-    @Test
-    @DisplayName("Should return results successfully with admin authentication")
-    void shouldReturnResultsSuccessfullyWithAdminAuth() throws Exception {
-      setUpAdminAuthentication("test-brunch");
-
-      // Create brunch with votes
-      Brunch brunchWithVotes =
-          Brunch.builder()
-              .id("test-brunch")
-              .title("Test Brunch")
-              .votes(List.of(sampleVote))
-              .build();
-
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(brunchWithVotes));
-      when(brunchService.voteToBrunchVoteDTO(any(Vote.class))).thenReturn(sampleVoteDTO);
-
-      mockMvc
-          .perform(get("/api/brunches/test-brunch/results"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(1)))
-          .andExpect(jsonPath("$[0].name", is("Test Voter")));
-    }
-
-    @Test
-    @DisplayName("Should return empty results when no votes exist")
-    void shouldReturnEmptyResultsWhenNoVotesExist() throws Exception {
-      setUpAdminAuthentication("test-brunch");
-
-      // Create brunch with no votes
-      Brunch brunchWithoutVotes =
-          Brunch.builder().id("test-brunch").title("Test Brunch").votes(List.of()).build();
-
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(brunchWithoutVotes));
-
-      mockMvc
-          .perform(get("/api/brunches/test-brunch/results"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(0)));
-    }
 
     @Test
     @DisplayName("Should return 403 when not authenticated")

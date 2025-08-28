@@ -24,3 +24,7 @@ logging:
     sql: error
     web: info
 #debug: true
+server:
+  error:
+    whitelabel:
+      enabled: false

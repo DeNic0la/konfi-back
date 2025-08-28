@@ -1,9 +1,8 @@
 package ch.denic0la.konfi.brunch.security;
 
-import java.util.function.Supplier;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
+import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -30,48 +29,34 @@ public class BrunchPasswordAuthenticationProvider implements AuthenticationProvi
     return null;
   }
 
-  private static Supplier<BrunchAuthorization> getSupplierForBrunchId(String brunchId) {
-    return () ->
-        BrunchAuthorization.builder()
-            .adminPasswordHash(null)
-            .votingPasswordHash(null)
-            .brunch_id(brunchId)
-            .build();
+  private boolean matches(@Nullable String rawPassword, @Nullable String encodedPassword) {
+    if (StringUtils.isBlank(rawPassword) || StringUtils.isBlank(encodedPassword)) {
+      return false;
+    }
+    return passwordEncoder.matches(rawPassword, encodedPassword);
   }
 
   private BrunchPasswordAuthenticationToken runAuthentication(
       BrunchAuthorization authData, BrunchPasswordAuthenticationToken token) {
     boolean votingPasswordIsEmpty = StringUtils.isEmpty(authData.getVotingPasswordHash());
     boolean adminPasswordIsEmpty = StringUtils.isEmpty(authData.getAdminPasswordHash());
-    if (votingPasswordIsEmpty) {
-      if (adminPasswordIsEmpty) {
-        BrunchPasswordAuthenticationToken adminToken;
-        if (token.isAdmin()) {
-          adminToken = token;
-        } else {
-          adminToken = BrunchPasswordAuthenticationToken.forAdmin(authData.getBrunch_id(), "");
-        }
-        adminToken.clearCredentialsAndSetAuth(true);
-        return adminToken;
-      }
-      if (!token.isAdmin()) {
-        token.clearCredentialsAndSetAuth(true);
-        return token;
-      }
-    } else {
-      if (!token.isAdmin() || adminPasswordIsEmpty) {
-        if (passwordEncoder.matches(token.getCredentials(), authData.getVotingPasswordHash())) {
-          token.clearCredentialsAndSetAuth(true);
-          return token;
-        }
-        throw new BadCredentialsException("Invalid Voting password");
-      }
-    }
-    if (passwordEncoder.matches(token.getCredentials(), authData.getAdminPasswordHash())) {
+
+    if (votingPasswordIsEmpty && (adminPasswordIsEmpty || !token.isAdmin())) {
       token.clearCredentialsAndSetAuth(true);
       return token;
     }
-    throw new BadCredentialsException("Invalid Admin password");
+    if (token.isAdmin()) {
+      if (adminPasswordIsEmpty
+          || matches(token.getCredentials(), authData.getAdminPasswordHash())) {
+        token.clearCredentialsAndSetAuth(true);
+        return token;
+      }
+    } else if (matches(token.getCredentials(), authData.getVotingPasswordHash())) {
+      token.clearCredentialsAndSetAuth(true);
+      return token;
+    }
+
+    throw new BadCredentialsException("Failed to validate credentials");
   }
 
   @Override
@@ -82,7 +67,14 @@ public class BrunchPasswordAuthenticationProvider implements AuthenticationProvi
       if (StringUtils.isBlank(brunchId)) return handleBlankBrunchId();
       try {
         var brunchAuthorization =
-            authorizationRepository.findById(brunchId).orElseGet(getSupplierForBrunchId(brunchId));
+            authorizationRepository
+                .findByBrunchId(brunchId)
+                .orElse(
+                    BrunchAuthorization.builder()
+                        .adminPasswordHash(null)
+                        .votingPasswordHash(null)
+                        .brunchId(brunchId)
+                        .build());
         log.info("Authenticating for brunch: " + brunchId);
 
         return runAuthentication(brunchAuthorization, token);
