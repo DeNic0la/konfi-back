@@ -1,6 +1,5 @@
 name: Spotless on PR
 on:
-  workflow_dispatch:
   pull_request:
     branches: [ "develop" ]
     types: [ "opened", "synchronize", "reopened" ]
