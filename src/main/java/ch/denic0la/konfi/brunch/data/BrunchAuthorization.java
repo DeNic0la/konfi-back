@@ -19,17 +19,17 @@ public class BrunchAuthorization {
 
   @Id
   @Column(name = COLUMN_BRUNCH_ID_NAME, nullable = false, length = 50)
-  private String brunch_id;
+  private String brunchId;
 
   @ToString.Exclude
-  @OneToOne(optional = false, orphanRemoval = true)
+  @OneToOne(optional = false, orphanRemoval = true, fetch = FetchType.LAZY)
   @MapsId
   @JoinColumn(name = "brunch_id", nullable = false)
   private Brunch brunch;
 
-  @Column(name = COLUMN_ADMINPASSWORDHASH_NAME, length = 60)
+  @Column(name = COLUMN_ADMINPASSWORDHASH_NAME, length = 70)
   private String adminPasswordHash;
 
-  @Column(name = COLUMN_VOTINGPASSWORDHASH_NAME, length = 60)
+  @Column(name = COLUMN_VOTINGPASSWORDHASH_NAME, length = 70)
   private String votingPasswordHash;
 }

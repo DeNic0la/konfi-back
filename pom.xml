@@ -392,6 +392,7 @@
                             <openapiGeneratorIgnoreList>
                                 **/OpenApiGeneratorApplication.java
                                 **/test/**
+                                **/OpenApiGeneratorApplicationTests.java
                             </openapiGeneratorIgnoreList>
                             <library>spring-boot</library>
                             <verbose>false</verbose>
@@ -403,7 +404,7 @@
                             <groupId>${project.groupId}.konfi</groupId>
                             <configHelp>false</configHelp>
                             <modelNameSuffix>DTO</modelNameSuffix>
-                            <generateApiTests>false</generateApiTests>
+                            <apiTests>false</apiTests>
                             <generateModelTests>false</generateModelTests>
                             <artifactVersion>${openapi-generator.brunch.version}</artifactVersion>
                             <configOptions>
@@ -431,6 +432,10 @@
                                 <sortModelPropertiesByRequiredFlag>true</sortModelPropertiesByRequiredFlag>
                                 <sortParamsByRequiredFlag>true</sortParamsByRequiredFlag>
                                 <useOptional>false</useOptional>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useBeanValidation>true</useBeanValidation>
+
+
                                 <configPackage>${openapi-generator.base-package}.configuration</configPackage>
                             </configOptions>
                             <!--output>${project.basedir}/generated</output-->

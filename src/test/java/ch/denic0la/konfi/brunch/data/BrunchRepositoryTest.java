@@ -112,7 +112,7 @@ class BrunchRepositoryTest {
     BrunchAuthorization auth =
         BrunchAuthorization.builder()
             .brunch(brunch)
-            .brunch_id("delete-test")
+            .brunchId("delete-test")
             .adminPasswordHash("admin-hash")
             .votingPasswordHash("vote-hash")
             .build();

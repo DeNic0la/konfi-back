@@ -9,10 +9,10 @@ INSERT INTO brunch (id, title, require_email, email_regexp) VALUES
 
 -- Insert authentication data for brunch sessions
 INSERT INTO brunch_authorization (brunch_id, admin_password_hash, voting_password_hash) VALUES
-('team-planning-2025', '$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
-('product-review-jan', '$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
-('tech-architecture', '$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
-('weekend-hackathon', '$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa');
+('team-planning-2025', '{bcrypt}$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '{bcrypt}$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
+('product-review-jan', '{bcrypt}$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '{bcrypt}$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
+('tech-architecture', '{bcrypt}$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '{bcrypt}$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa'),
+('weekend-hackathon', '{bcrypt}$2b$12$hFIviNUQ8aOPXcm2L.GQue.1moyOSPnpQ63a1bdNBuGa24ESlRye6', '{bcrypt}$2b$12$6lcQf7KnIukwJq7XwEIcDeMTAu6A7OCAjuS.xC2QpIAVT1/3d7mKa');
 
 -- Insert questions for Team Planning Session
 INSERT INTO question (title, link, min, max, recommended, sort_order_number, brunch_id, optional) VALUES

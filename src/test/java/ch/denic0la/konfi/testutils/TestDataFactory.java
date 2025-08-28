@@ -79,7 +79,7 @@ public class TestDataFactory {
     Brunch brunch = brunch(id, title);
     BrunchAuthorization auth =
         BrunchAuthorization.builder()
-            .brunch_id(id)
+            .brunchId(id)
             .adminPasswordHash(adminPassword)
             .votingPasswordHash(votingPassword)
             .brunch(brunch)
@@ -90,7 +90,7 @@ public class TestDataFactory {
 
   // Question factory methods using Lombok-generated builder
   public static Question.QuestionBuilder questionBuilder() {
-    return Question.builder().title("Test Question").min(1).max(5).optional(false).order(1);
+    return Question.builder().id(1).title("Test Question").min(1).max(5).optional(false).order(1);
   }
 
   public static Question question() {
@@ -269,6 +269,20 @@ public class TestDataFactory {
   // Common test data presets
   public static Brunch createSimpleBrunch(String id, String title) {
     return brunch(id, title);
+  }
+
+  public static Brunch createTestBrunch() {
+    Question question = questionBuilder().id(1).title("Test Question").order(1).build();
+    Brunch brunch = brunchBuilder().id("test-brunch").title("Test Brunch").build();
+    question.setBrunch(brunch);
+    brunch.getQuestions().add(question);
+    return brunch;
+  }
+
+  public static Vote createTestVote(Brunch brunch) {
+    Vote vote = voteBuilder().name("Test Voter").email("test@example.com").build();
+    vote.setBrunch(brunch);
+    return vote;
   }
 
   public static BrunchCreateDTO createSimpleBrunchCreateDTO(String id, String title) {

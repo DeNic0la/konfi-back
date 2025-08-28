@@ -5,3 +5,7 @@ spring:
     url: "jdbc:mysql://localhost/test"
     username: "dbuser"
     password: "dbpass"
+server:
+  error:
+    whitelabel:
+      enabled: false

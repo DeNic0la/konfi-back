@@ -1,12 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="KonfiApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+  <configuration default="false" name="KonfiApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" show_console_on_std_err="true">
     <option name="ACTIVE_PROFILES" value="development,dev" />
-    <classpathModifications>
-      <entry exclude="true" path="\\wsl.localhost\Ubuntu-24.04\home\g\IdeaProjects\konfi\target\test-classes" />
-    </classpathModifications>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="konfi" />
+    <target name="@@@LOCAL@@@" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="ch.denic0la.konfi.KonfiApplication" />
-    <method v="2" />
+    <option name="UPDATE_ACTION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
   </configuration>
 </component>

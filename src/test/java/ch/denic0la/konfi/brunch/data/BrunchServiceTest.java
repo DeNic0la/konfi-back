@@ -9,9 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchInfoDTO;
@@ -20,18 +21,15 @@ import ch.denic0la.openapi.konfi.brunch.model.BrunchQuestionInfoDTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = {"spring.profiles.active=test"})
+@SpringBootTest
+@ActiveProfiles("test")
 class BrunchServiceTest {
 
-  private BrunchService brunchService;
+  @Autowired private BrunchService brunchService;
 
   @BeforeEach
-  void setUp() throws Exception {
-    brunchService = new BrunchService();
-    // Use reflection to set the private field
-    java.lang.reflect.Field field = BrunchService.class.getDeclaredField("modelMapper");
-    field.setAccessible(true);
-    field.set(brunchService, new ModelMapper());
+  void setUp() {
+    // No manual setup needed - Spring Boot will wire dependencies
   }
 
   @Nested
@@ -239,7 +237,7 @@ class BrunchServiceTest {
       assertThat(result.getEmailRegexp()).isEqualTo(".*@company\\.com");
 
       assertThat(result.getBrunchAuthorization()).isNotNull();
-      assertThat(result.getBrunchAuthorization().getBrunch_id()).isEqualTo("new-brunch");
+      assertThat(result.getBrunchAuthorization().getBrunchId()).isEqualTo("new-brunch");
       assertThat(result.getBrunchAuthorization().getAdminPasswordHash()).isEqualTo("admin-pass");
       assertThat(result.getBrunchAuthorization().getVotingPasswordHash()).isEqualTo("vote-pass");
 

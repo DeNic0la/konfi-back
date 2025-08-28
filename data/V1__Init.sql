@@ -9,8 +9,8 @@ CREATE TABLE brunch
 CREATE TABLE brunch_authorization
 (
     brunch_id            VARCHAR(50) NOT NULL,
-    admin_password_hash  VARCHAR(60) NULL,
-    voting_password_hash VARCHAR(60) NULL,
+    admin_password_hash  VARCHAR(70) NULL,
+    voting_password_hash VARCHAR(70) NULL,
     CONSTRAINT pk_brunch_authorization PRIMARY KEY (brunch_id)
 );
 

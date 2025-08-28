@@ -1,7 +1,9 @@
 package ch.denic0la.konfi.brunch.security;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -56,6 +58,13 @@ public class BrunchAuthenticationProcessingFilter extends AbstractAuthentication
       HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
       throws IOException, ServletException {
     logger.warn("Unsuccessful authentication for: " + failed.getMessage());
-    super.unsuccessfulAuthentication(request, response, failed);
+    SecurityContextHolder.getContextHolderStrategy().clearContext();
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    PrintWriter writer = response.getWriter();
+    writer.print("{\"status\": \"401\", \"message\": \"" + failed.getMessage() + "\"}");
+    writer.flush();
+    writer.close();
+    // super.unsuccessfulAuthentication(request, response, failed);
   }
 }
