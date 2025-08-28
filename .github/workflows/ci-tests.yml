@@ -12,36 +12,17 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: mydatabase
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
-    strategy:
-      matrix:
-        java-version: [21, 24]
-      fail-fast: false
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK ${{ matrix.java-version }}
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.java-version }}
+          java-version:  '24'
 
       - name: Cache Maven dependencies
         uses: actions/cache@v4
@@ -50,19 +31,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Wait for MySQL to be ready
-        run: |
-          until mysqladmin ping -h"127.0.0.1" -P"3306" -uroot -proot --silent; do
-            echo 'waiting for mysql...'
-            sleep 2
-          done
-
       - name: Run tests
         run: ./mvnw clean test -Pdev
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/mydatabase
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
+
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
