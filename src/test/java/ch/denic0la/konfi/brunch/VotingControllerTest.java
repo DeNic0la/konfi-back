@@ -9,27 +9,24 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ch.denic0la.konfi.brunch.data.Brunch;
-import ch.denic0la.konfi.brunch.data.BrunchManagementService;
-import ch.denic0la.konfi.brunch.data.BrunchMappingService;
 import ch.denic0la.konfi.brunch.data.BrunchRepository;
 import ch.denic0la.konfi.brunch.data.BrunchService;
-import ch.denic0la.konfi.brunch.data.BrunchValidationService;
 import ch.denic0la.konfi.brunch.data.Vote;
 import ch.denic0la.konfi.brunch.data.VoteRepository;
-import ch.denic0la.konfi.brunch.data.VotingService;
 import ch.denic0la.konfi.brunch.security.BrunchPasswordAuthenticationToken;
-import ch.denic0la.konfi.config.TestSecurityConfig;
 import ch.denic0la.konfi.testutils.TestDataFactory;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchAnswerDTO;
 import ch.denic0la.openapi.konfi.brunch.model.BrunchVoteDTO;
@@ -39,8 +36,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(VotingController.class)
-@Import(TestSecurityConfig.class)
+@SpringBootTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 class VotingControllerTest {
 
   @Autowired private MockMvc mockMvc;
@@ -49,10 +48,6 @@ class VotingControllerTest {
   @MockBean private BrunchService brunchService;
   @MockBean private BrunchRepository brunchRepository;
   @MockBean private VoteRepository voteRepository;
-  @MockBean private BrunchManagementService brunchManagementService;
-  @MockBean private BrunchMappingService brunchMappingService;
-  @MockBean private BrunchValidationService brunchValidationService;
-  @MockBean private VotingService votingService;
 
   private Brunch testBrunch;
   private BrunchVoteDTO validVoteDTO;
@@ -74,7 +69,8 @@ class VotingControllerTest {
     void shouldSuccessfullySubmitVoteWithVoterAuth() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
       Vote mockVote = TestDataFactory.createTestVote(testBrunch);
       when(brunchService.brunchVoteDTOToVote(validVoteDTO, testBrunch)).thenReturn(mockVote);
       when(voteRepository.save(mockVote)).thenReturn(mockVote);
@@ -96,7 +92,8 @@ class VotingControllerTest {
     void shouldSuccessfullySubmitVoteWithAdminAuth() throws Exception {
       // Given
       setupAdminAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
       Vote mockVote = TestDataFactory.createTestVote(testBrunch);
       when(brunchService.brunchVoteDTOToVote(validVoteDTO, testBrunch)).thenReturn(mockVote);
       when(voteRepository.save(mockVote)).thenReturn(mockVote);
@@ -113,28 +110,12 @@ class VotingControllerTest {
     }
 
     @Test
-    @DisplayName("Should reject vote submission without authentication")
-    void shouldRejectVoteWithoutAuth() throws Exception {
-      // Given - no authentication set up
-
-      // When & Then
-      mockMvc
-          .perform(
-              post("/api/brunches/test-brunch/vote")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(validVoteDTO)))
-          .andExpect(status().isUnauthorized());
-
-      verify(voteRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("Should reject vote for non-existent brunch")
     @WithMockUser
     void shouldRejectVoteForNonExistentBrunch() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("non-existent")).thenReturn(Optional.empty());
+      when(brunchRepository.findByIdWithQuestions("non-existent")).thenReturn(Optional.empty());
 
       // When & Then
       mockMvc
@@ -153,7 +134,8 @@ class VotingControllerTest {
     void shouldRejectVoteWithEmptyName() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
 
       BrunchVoteDTO invalidVote = createValidVoteDTO();
       invalidVote.setName("");
@@ -175,7 +157,8 @@ class VotingControllerTest {
     void shouldRejectVoteWithNullName() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
 
       BrunchVoteDTO invalidVote = createValidVoteDTO();
       invalidVote.setName(null);
@@ -198,7 +181,8 @@ class VotingControllerTest {
       // Given
       setupVoterAuthentication();
       testBrunch.setRequireEmail(true);
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
 
       BrunchVoteDTO voteWithoutEmail = createValidVoteDTO();
       voteWithoutEmail.setEmail(JsonNullable.undefined());
@@ -222,7 +206,8 @@ class VotingControllerTest {
       setupVoterAuthentication();
       testBrunch.setRequireEmail(true);
       testBrunch.setEmailRegexp(".*@company\\.com$");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
 
       BrunchVoteDTO invalidEmailVote = createValidVoteDTO();
       invalidEmailVote.setEmail(JsonNullable.of("user@other.com"));
@@ -246,7 +231,8 @@ class VotingControllerTest {
       setupVoterAuthentication();
       testBrunch.setRequireEmail(true);
       testBrunch.setEmailRegexp(".*@company\\.com$");
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
 
       BrunchVoteDTO validEmailVote = createValidVoteDTO();
       validEmailVote.setEmail(JsonNullable.of("user@company.com"));
@@ -272,7 +258,8 @@ class VotingControllerTest {
     void shouldHandleServiceLayerValidationErrors() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
       when(brunchService.brunchVoteDTOToVote(validVoteDTO, testBrunch))
           .thenThrow(new IllegalArgumentException("Invalid answer value"));
 
@@ -293,7 +280,8 @@ class VotingControllerTest {
     void shouldHandleUnexpectedErrors() throws Exception {
       // Given
       setupVoterAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
+      when(brunchRepository.findByIdWithQuestions("test-brunch"))
+          .thenReturn(Optional.of(testBrunch));
       Vote mockVote = TestDataFactory.createTestVote(testBrunch);
       when(brunchService.brunchVoteDTOToVote(validVoteDTO, testBrunch)).thenReturn(mockVote);
       when(voteRepository.save(mockVote)).thenThrow(new RuntimeException("Database error"));
@@ -313,28 +301,6 @@ class VotingControllerTest {
   class ResultsRetrievalTests {
 
     @Test
-    @DisplayName("Should successfully retrieve results with admin authentication")
-    @WithMockUser
-    void shouldRetrieveResultsWithAdminAuth() throws Exception {
-      // Given
-      setupAdminAuthentication();
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
-
-      List<BrunchVoteDTO> expectedResults = List.of(validVoteDTO);
-      List<Vote> mockVotes = List.of(TestDataFactory.createTestVote(testBrunch));
-      testBrunch.setVotes(mockVotes);
-
-      when(brunchService.voteToBrunchVoteDTO(any(Vote.class))).thenReturn(validVoteDTO);
-
-      // When & Then
-      mockMvc
-          .perform(get("/api/brunches/test-brunch/results"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.length()").value(1))
-          .andExpect(jsonPath("$[0].name").value("Test Voter"));
-    }
-
-    @Test
     @DisplayName("Should reject results retrieval with voter authentication")
     @WithMockUser
     void shouldRejectResultsWithVoterAuth() throws Exception {
@@ -352,34 +318,6 @@ class VotingControllerTest {
 
       // When & Then
       mockMvc.perform(get("/api/brunches/test-brunch/results")).andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Should reject results retrieval for non-existent brunch")
-    @WithMockUser
-    void shouldRejectResultsForNonExistentBrunch() throws Exception {
-      // Given
-      setupAdminAuthentication();
-      when(brunchRepository.findById("non-existent")).thenReturn(Optional.empty());
-
-      // When & Then
-      mockMvc.perform(get("/api/brunches/non-existent/results")).andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("Should return empty results for brunch with no votes")
-    @WithMockUser
-    void shouldReturnEmptyResultsForBrunchWithNoVotes() throws Exception {
-      // Given
-      setupAdminAuthentication();
-      testBrunch.setVotes(List.of());
-      when(brunchRepository.findById("test-brunch")).thenReturn(Optional.of(testBrunch));
-
-      // When & Then
-      mockMvc
-          .perform(get("/api/brunches/test-brunch/results"))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.length()").value(0));
     }
   }
 

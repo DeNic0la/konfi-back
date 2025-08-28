@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import ch.denic0la.openapi.konfi.brunch.model.BrunchCreateDTO;
@@ -238,8 +239,18 @@ class BrunchServiceTest {
 
       assertThat(result.getBrunchAuthorization()).isNotNull();
       assertThat(result.getBrunchAuthorization().getBrunchId()).isEqualTo("new-brunch");
-      assertThat(result.getBrunchAuthorization().getAdminPasswordHash()).isEqualTo("admin-pass");
-      assertThat(result.getBrunchAuthorization().getVotingPasswordHash()).isEqualTo("vote-pass");
+
+      // Verify passwords are properly encoded with BCrypt
+      BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+      assertThat(result.getBrunchAuthorization().getAdminPasswordHash()).startsWith("{bcrypt}");
+      String adminHashWithoutPrefix =
+          result.getBrunchAuthorization().getAdminPasswordHash().substring(8);
+      assertThat(encoder.matches("admin-pass", adminHashWithoutPrefix)).isTrue();
+
+      assertThat(result.getBrunchAuthorization().getVotingPasswordHash()).startsWith("{bcrypt}");
+      String votingHashWithoutPrefix =
+          result.getBrunchAuthorization().getVotingPasswordHash().substring(8);
+      assertThat(encoder.matches("vote-pass", votingHashWithoutPrefix)).isTrue();
 
       assertThat(result.getQuestions()).hasSize(1);
       Question question = result.getQuestions().get(0);
