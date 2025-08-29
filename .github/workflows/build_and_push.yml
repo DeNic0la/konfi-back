@@ -44,4 +44,4 @@ jobs:
         with:
           subject-name: registry.digitalocean.com/denic0la-ocean/konfi-back
           subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          push-to-registry: false
