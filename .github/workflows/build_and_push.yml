@@ -38,7 +38,7 @@ jobs:
         id: push
         run: |
           docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }}
-          echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }})" >> $GITHUB_OUTPUT
+          echo "digest=$(docker inspect --format='{{index .Id 0}}' registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }})" >> $GITHUB_OUTPUT
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
