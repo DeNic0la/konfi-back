@@ -31,4 +31,4 @@ jobs:
         run: doctl registry login --expiry-seconds 1200
 
       - name: Push image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ github.ref_name }}
+        run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }}
