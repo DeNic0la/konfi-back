@@ -489,11 +489,10 @@
                         </exclude>
                     </excludes>
                     <image>
-                        <name>registry.digitalocean.com/denic0la-ocean/konfi-back:${project.version}</name>
+                        <name>registry.digitalocean.com/denic0la-ocean/konfi-back:${env.IMAGE_TAG}</name>
                         <env>
                             <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
                         </env>
-                        <publish>true</publish>
                     </image>
                 </configuration>
             </plugin>

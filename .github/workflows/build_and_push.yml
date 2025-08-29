@@ -1,9 +1,9 @@
 name: Build and Push Docker Image
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ "develop" ]
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0
 
 jobs:
   build:
@@ -20,7 +20,8 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -DskipTests=true -P prod org.springframework.boot:spring-boot-maven-plugin:3.5.3:build-image -f pom.xml
-
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -30,4 +31,4 @@ jobs:
         run: doctl registry login --expiry-seconds 1200
 
       - name: Push image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back --all-tags
+        run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ github.ref_name }}
