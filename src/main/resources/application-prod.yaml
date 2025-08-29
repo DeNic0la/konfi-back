@@ -1,10 +1,23 @@
 spring:
+  flyway:
+    enabled: false
   jpa:
-    hibernate.ddl-auto: "validate"
+    hibernate:
+      ddl-auto: "none"
+    show-sql: false
+    database-platform: ${DATABASE_PLATFORM:-org.hibernate.dialect.MySQLDialect}
   datasource:
-    url: "jdbc:mysql://localhost/test"
-    username: "dbuser"
-    password: "dbpass"
+    url: ${DATABASE_URL}
+    driverClassName: ${DATABASE_DRIVER_CLASSNAME:-com.mysql.jdbc.Driver}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+logging:
+  level:
+    root: warn
 server:
   error:
     whitelabel:
