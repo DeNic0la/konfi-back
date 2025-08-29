@@ -20,7 +20,11 @@ jobs:
         with:
           java-version: '24'
           distribution: 'temurin'
-          cache: maven
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
