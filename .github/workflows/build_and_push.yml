@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
     env:
       IMAGE_TAG: ${{ github.ref_name }}
     steps:
@@ -17,7 +20,12 @@ jobs:
         with:
           java-version: '24'
           distribution: 'temurin'
-          cache: maven
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -27,4 +35,14 @@ jobs:
       - name: Build with Maven
         run: mvn -DskipTests=true -P prod org.springframework.boot:spring-boot-maven-plugin:3.5.3:build-image -f pom.xml
       - name: Push image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }}
+        id: push
+        run: |
+          docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }}
+          echo "digest=$(docker inspect --format='{{index .RepoDigests 0}}' registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }})" >> $GITHUB_OUTPUT
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: registry.digitalocean.com/denic0la-ocean/konfi-back
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

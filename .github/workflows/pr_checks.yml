@@ -1,16 +1,17 @@
-name: CI Tests
+name: Pull Request Checks
 
 on:
   pull_request:
     branches: [ "develop" ]
     types: [ "opened", "synchronize", "reopened" ]
-  push:
-    branches: [ "develop" ]
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Checks
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     permissions:
       checks: write
       pull-requests: write
@@ -19,31 +20,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version:  '24'
-
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
       - name: Run tests
         run: ./mvnw clean test -Pdev
-
-
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: (!cancelled())
         with:
           files: target/surefire-reports/*.xml
           check_name: "Test Results (Java)"
-
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -52,3 +47,11 @@ jobs:
           path: |
             target/surefire-reports/
             target/site/jacoco/
+      - name: Code Style Check
+        run: |
+          mvn install -DskipTests=true -Pspotless
+          mvn spotless:apply -Pspotless
+      - uses: stefanzweifel/git-auto-commit-action@v6
+        with:
+          commit_message: "chore(ci): spotless:apply"
+          status_options: '--untracked-files=no'
