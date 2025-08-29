@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    env:
+      IMAGE_TAG: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 24
@@ -20,15 +20,11 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -DskipTests=true -P prod org.springframework.boot:spring-boot-maven-plugin:3.5.3:build-image -f pom.xml
-        env:
-          IMAGE_TAG: ${{ github.ref_name }}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
-
       - name: Push image to DigitalOcean Container Registry
         run: docker push registry.digitalocean.com/denic0la-ocean/konfi-back:${{ env.IMAGE_TAG }}
