@@ -5,10 +5,10 @@ spring:
     hibernate:
       ddl-auto: "none"
     show-sql: false
-    database-platform: ${DATABASE_PLATFORM:-org.hibernate.dialect.MySQLDialect}
+    database-platform: ${DATABASE_PLATFORM:org.hibernate.dialect.MySQLDialect}
   datasource:
     url: ${DATABASE_URL}
-    driverClassName: ${DATABASE_DRIVER_CLASSNAME:-com.mysql.jdbc.Driver}
+    driverClassName: ${DATABASE_DRIVER_CLASSNAME:com.mysql.jdbc.Driver}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
 management:
