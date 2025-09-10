@@ -28,6 +28,9 @@ public class WebSocketSecurityConfig {
         .permitAll()
         .anyMessage()
         .permitAll();
+    messages.nullDestMatcher().permitAll();
+    messages.simpDestMatchers("**").permitAll();
+    messages.anyMessage().permitAll();
     return messages.build();
   }
 }
