@@ -12,9 +12,32 @@ spring:
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
 management:
+  health:
+    defaults:
+      enabled: true
+    db:
+      enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  defaults:
+    metrics:
+      export:
+        enabled: true
   endpoints:
     web:
       base-path: /actuator
+      exposure:
+        include: health
+      discovery:
+        enabled: true
+  endpoint:
+    startup:
+      access: unrestricted
+    health:
+      probes:
+        enabled: true
 logging:
   level:
     root: warn
