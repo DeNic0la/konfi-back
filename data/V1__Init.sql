@@ -60,8 +60,3 @@ ALTER TABLE vote_answer
 
 ALTER TABLE vote_answer
     ADD CONSTRAINT FK_VOTE_ANSWER_ON_VOTE FOREIGN KEY (vote_id) REFERENCES vote (id);
-
-
-
-insert into brunch (id, title, require_email, email_regexp)
-values  ('PI-25-3-Rudolf', 'Planning 25-3 Team Rudolf Confidence Voting', false, null);
