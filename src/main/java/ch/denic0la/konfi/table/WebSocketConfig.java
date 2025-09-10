@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void configureMessageBroker(MessageBrokerRegistry registry) {
     registry.setApplicationDestinationPrefixes("/live");
     //registry.setUserDestinationPrefix("/queue").enableSimpleBroker("/queue");
-    registry.enableSimpleBroker("/table").setHeartbeatValue(new long[] {10000, 20000}).setTaskScheduler(heartBeatScheduler());
+    registry.enableSimpleBroker("/table");//.setHeartbeatValue(new long[] {10000, 20000}).setTaskScheduler(heartBeatScheduler());
   }
 
     @Bean
