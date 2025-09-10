@@ -40,7 +40,7 @@ management:
         enabled: true
 logging:
   level:
-    root: warn
+    root: info
 server:
   error:
     whitelabel:
