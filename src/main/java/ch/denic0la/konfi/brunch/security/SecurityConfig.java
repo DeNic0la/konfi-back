@@ -41,24 +41,18 @@ public class SecurityConfig {
   @Bean
   @Order(3)
   public SecurityFilterChain webSocketsSecurityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf(AbstractHttpConfigurer::disable)
+    return http.csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
         .securityMatcher("/native", "/sockJs", "/live/**")
         .authorizeHttpRequests(
             authz ->
                 authz
-                    .requestMatchers("/native")
-                    .permitAll()
-                    .requestMatchers("/sockJs*")
-                    .permitAll()
-                    .requestMatchers("/live/**")
+                    .anyRequest()
                     .permitAll())
-        .httpBasic(Customizer.withDefaults())
         .sessionManagement(
             httpSecuritySessionManagementConfigurer ->
                 httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS));
-    return http.build();
+                    SessionCreationPolicy.STATELESS)).build();
   }
 
   private static final String[] PUBLIC_PATHS = {"/api/brunches", "/api/ok", "/actuator"};
