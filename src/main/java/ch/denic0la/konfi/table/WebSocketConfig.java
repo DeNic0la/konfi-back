@@ -2,6 +2,7 @@ package ch.denic0la.konfi.table;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -22,12 +23,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
     registry.setApplicationDestinationPrefixes("/live");
-    registry.setUserDestinationPrefix("/queue").enableSimpleBroker("/queue");
-    registry.enableSimpleBroker("/table");//.setHeartbeatValue(new long[] {10000, 20000}).setTaskScheduler(heartBeatScheduler());
+    //registry.setUserDestinationPrefix("/queue").enableSimpleBroker("/queue");
+    registry.enableSimpleBroker("/table"); // .setHeartbeatValue(new long[] {10000,
+    // 20000}).setTaskScheduler(heartBeatScheduler());
   }
 
-    @Bean
-    public TaskScheduler heartBeatScheduler() {
-        return new ThreadPoolTaskScheduler();
-    }
+  @Override
+  public void configureClientInboundChannel(final ChannelRegistration registration) {
+    // registration.interceptors(new
+    // WebSocketAuthChannelInterceptorAdapter(this.webSocketAuthenticatorService));
+  }
+
+  @Bean
+  public TaskScheduler heartBeatScheduler() {
+    return new ThreadPoolTaskScheduler();
+  }
 }

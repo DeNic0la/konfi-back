@@ -16,7 +16,7 @@ public class WebSocketSecurityConfig {
   AuthorizationManager<Message<?>> messageAuthorizationManager(
       MessageMatcherDelegatingAuthorizationManager.Builder messages) {
     // TODO: Maybe ensure there is an user set
-    messages
+    return messages
         .simpDestMatchers("/live/**")
         .permitAll()
         .simpTypeMatchers(
@@ -27,10 +27,17 @@ public class WebSocketSecurityConfig {
             SimpMessageType.DISCONNECT)
         .permitAll()
         .anyMessage()
-        .permitAll();
-    messages.nullDestMatcher().permitAll();
-    messages.simpDestMatchers("**").permitAll();
-    messages.anyMessage().permitAll();
-    return messages.build();
+        .permitAll()
+        .nullDestMatcher()
+        .permitAll()
+        .simpDestMatchers("**")
+        .permitAll()
+        .anyMessage()
+        .permitAll()
+        .simpSubscribeDestMatchers("**")
+        .permitAll()
+        .simpMessageDestMatchers("**")
+        .permitAll()
+        .build();
   }
 }

@@ -2,6 +2,8 @@ package ch.denic0la.konfi.table;
 
 import ch.denic0la.konfi.table.user.TableUserService;
 import jakarta.annotation.Resource;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
+@Log
 @Component
 @RequiredArgsConstructor
 public class WebSocketEventListener {
@@ -35,6 +38,7 @@ public class WebSocketEventListener {
 
   @EventListener
   public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+      log.severe("Connected");
     StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
     String username = this.getAttr(headerAccessor, "username");
     String table = this.getAttr(headerAccessor, "table");
