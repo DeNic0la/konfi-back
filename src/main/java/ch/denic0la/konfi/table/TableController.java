@@ -4,6 +4,8 @@ import ch.denic0la.konfi.table.user.TableUser;
 import ch.denic0la.konfi.table.user.TableUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -19,11 +21,13 @@ import lombok.RequiredArgsConstructor;
 import java.util.Objects;
 
 @Controller
-@RequiredArgsConstructor
 @Log
 public class TableController {
   private static final String topicTemplate = "/table/%s";
-  private final SimpMessageSendingOperations messagingTemplate;
+
+  @Autowired
+  @Lazy
+  private SimpMessageSendingOperations messagingTemplate;
 
   @Resource
   private TableUserService tableUserService;
@@ -76,7 +80,7 @@ public class TableController {
         setAttr(headerAccessor,"tableUserId", uuid);
     } catch (Exception e) {
         log.severe(e.getLocalizedMessage());
-        messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors",e.getLocalizedMessage());
+        //messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors",e.getLocalizedMessage());
         return;
     }
 
@@ -88,13 +92,13 @@ public class TableController {
         var userId = getAttr(headerAccessor,"tableUserId");
         if (userId == null){
             log.warning("No user registered for session "+headerAccessor.getSessionId());
-            messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors","No user registered");
+            //messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors","No user registered");
             return;
         }
         var user = tableUserService.getUser(userId);
         if (user == null){
             log.warning("No user found for id "+userId);
-            messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors","No user found");
+            //messagingTemplate.convertAndSendToUser(Objects.requireNonNull(headerAccessor.getSessionId()),"/queue/errors","No user found");
             return;
         }
         var tableMessage = tableUserMessage.toTableMessage(user);
