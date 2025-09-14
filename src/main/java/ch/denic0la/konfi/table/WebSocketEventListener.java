@@ -4,6 +4,8 @@ import ch.denic0la.konfi.table.user.TableUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -18,10 +20,11 @@ import java.util.Objects;
 
 @Log
 @Component
-@RequiredArgsConstructor
 public class WebSocketEventListener {
   private static final String topicTemplate = "/table/%s";
-  private final SimpMessageSendingOperations messagingTemplate;
+  @Lazy
+  @Autowired
+  private SimpMessageSendingOperations messagingTemplate;
 
 
     @Resource

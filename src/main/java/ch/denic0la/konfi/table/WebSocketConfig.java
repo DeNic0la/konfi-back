@@ -22,9 +22,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
-    registry.setApplicationDestinationPrefixes("/live");
+    registry.setApplicationDestinationPrefixes("/live/");
+    
     //registry.setUserDestinationPrefix("/queue").enableSimpleBroker("/queue");
-    registry.enableSimpleBroker("/table"); // .setHeartbeatValue(new long[] {10000,
+    registry.enableSimpleBroker("/table/"); // .setHeartbeatValue(new long[] {10000,
     // 20000}).setTaskScheduler(heartBeatScheduler());
   }
 

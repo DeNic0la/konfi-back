@@ -38,12 +38,12 @@ public class SecurityConfig {
 
   @Autowired private AuthenticationConfiguration authenticationConfiguration;
 
-  @Bean
-  @Order(3)
+
   public SecurityFilterChain webSocketsSecurityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
         .cors(AbstractHttpConfigurer::disable)
-        .securityMatcher("/native", "/sockJs", "/live/**")
+        .securityMatcher("/native", "/sockJs", "/live/**").build();
+            /*
         .authorizeHttpRequests(
             authz ->
                 authz
@@ -52,7 +52,7 @@ public class SecurityConfig {
         .sessionManagement(
             httpSecuritySessionManagementConfigurer ->
                 httpSecuritySessionManagementConfigurer.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS)).build();
+                    SessionCreationPolicy.STATELESS)).build();*/
   }
 
   private static final String[] PUBLIC_PATHS = {"/api/brunches", "/api/ok", "/actuator"};
