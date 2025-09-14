@@ -21,7 +21,8 @@ logging:
     ch: debug
     sql: error
     web: info
-#debug: true
+    root: debug
+debug: true
 server:
   error:
     whitelabel:
